@@ -19,6 +19,7 @@ interface JournalDay {
   stats: DayStats | null;
   hasNote: boolean;
   notePreview: string;
+  mood: string | null;
 }
 
 const PAGE_SIZE = 50;
@@ -104,6 +105,11 @@ function Journal() {
                   </div>
                 ) : (
                   <div className="flex-1 text-sm text-muted-foreground">Sin trades</div>
+                )}
+                {day.mood && (
+                  <span className="text-xs text-muted-foreground" title="Estado del día">
+                    {day.mood}
+                  </span>
                 )}
                 {day.hasNote && (
                   <span className="flex items-center gap-1.5 text-xs text-muted-foreground">

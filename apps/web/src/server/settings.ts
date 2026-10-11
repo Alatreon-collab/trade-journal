@@ -31,8 +31,8 @@ export const deleteSetting = (key: string): void => {
   db.delete(settings).where(eq(settings.key, key)).run();
 };
 
-/** Journal display timezone (IANA), default UTC. */
-export const getTimeZone = (): string => getSetting("timeZone") ?? "UTC";
+/** Journal display timezone (IANA). Por defecto, hora de Nueva York (así opera Kiko). */
+export const getTimeZone = (): string => getSetting("timeZone") ?? "America/New_York";
 
 /** Preserve the legacy parsing default until a separate import zone is saved. */
 export const getImportTimeZone = (): string => getSetting("importTimeZone") ?? getTimeZone();

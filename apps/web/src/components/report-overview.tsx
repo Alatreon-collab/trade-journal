@@ -11,10 +11,20 @@ import { useApi } from "@/lib/use-api";
 import { fmtMoney, fmtPercent, pnlClass } from "@/lib/utils";
 import { describeFilters } from "@/lib/filter-description";
 import { groupLabel } from "@/lib/group-labels";
+import { psychKeyLabel, SESSIONS, sessionLabel } from "@/lib/psychology";
 
 interface OverviewData {
   buckets: Record<
-    "symbol" | "tag" | "mistake" | "playbook" | "weekday" | "hour" | "duration" | "direction",
+    | "symbol"
+    | "tag"
+    | "mistake"
+    | "playbook"
+    | "weekday"
+    | "hour"
+    | "duration"
+    | "direction"
+    | "session"
+    | "psych",
     BucketStats[]
   >;
   currencies: string[];
@@ -25,6 +35,8 @@ interface OverviewData {
 
 // Keep the original overview's aggregations and ordering alongside the advanced reports.
 const SECTIONS = [
+  { key: "session", title: "Por sesión", column: "Sesión" },
+  { key: "hour", title: "Por hora de entrada", column: "Hora" },
   { key: "symbol", title: "Por símbolo", column: "Símbolo" },
   { key: "direction", title: "Long vs short", column: "Dirección" },
   { key: "weekday", title: "Por día de la semana", column: "Día" },
@@ -32,6 +44,7 @@ const SECTIONS = [
   { key: "tag", title: "Por etiqueta", column: "Etiqueta" },
   { key: "mistake", title: "Por error", column: "Error" },
   { key: "playbook", title: "Por playbook", column: "Playbook" },
+  { key: "psych", title: "Por psicología", column: "Psicología" },
 ] as const;
 
 export function ReportOverview({ query, filters }: { query: string; filters: AnalysisFilters }) {
@@ -54,7 +67,13 @@ export function ReportOverview({ query, filters }: { query: string; filters: Ana
   const label = (dimension: string, key: string) =>
     dimension === "playbook"
       ? (data.playbooks.find((book) => book.id === key)?.name ?? groupLabel(key))
-      : groupLabel(key);
+      : dimension === "session"
+        ? sessionLabel(key)
+        : dimension === "hour"
+          ? `${key}:00`
+          : dimension === "psych"
+            ? psychKeyLabel(key)
+            : groupLabel(key);
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -102,9 +121,13 @@ export function ReportOverview({ query, filters }: { query: string; filters: Ana
             <CardContent>
               {data.buckets[section.key].length === 0 ? (
                 <p className="py-8 text-center text-sm text-muted-foreground">
-                  {section.key === "tag" || section.key === "mistake" || section.key === "playbook"
-                    ? "Anota tus trades para ver este desglose."
-                    : "Aún no hay datos."}
+                  {section.key === "psych"
+                    ? "Rellena la psicología en la ficha de tus trades para ver este desglose."
+                    : section.key === "tag" ||
+                        section.key === "mistake" ||
+                        section.key === "playbook"
+                      ? "Anota tus trades para ver este desglose."
+                      : "Aún no hay datos."}
                 </p>
               ) : (
                 <Table>
@@ -141,11 +164,14 @@ export function ReportOverview({ query, filters }: { query: string; filters: Ana
         ))}
       </div>
       <p className="text-xs leading-relaxed text-muted-foreground">
-        El día de la semana y la hora usan la hora de apertura. El número de trades del resumen
-        incluye posiciones abiertas; el winrate usa solo trades cerrados. El tiempo en el trade
-        necesita un trade cerrado. Las etiquetas y los errores pueden solaparse. «Por símbolo»
-        muestra los 20 mejores por P&L neto; en «Desglose» están todos los símbolos y más métricas
-        de los trades cerrados.
+        Sesiones según la hora de entrada en Nueva York:{" "}
+        {SESSIONS.map((session) => `${session.label} ${session.hours}`).join(" · ")}; el resto
+        cuenta como «Fuera de sesión». El día de la semana y la hora usan la hora de apertura en{" "}
+        {data.timeZone}. En «Por psicología» un trade cuenta en cada opción que marcaste. El número
+        de trades del resumen incluye posiciones abiertas; el winrate usa solo trades cerrados. El
+        tiempo en el trade necesita un trade cerrado. Las etiquetas y los errores pueden solaparse.
+        «Por símbolo» muestra los 20 mejores por P&L neto; en «Desglose» están todos los símbolos y
+        más métricas de los trades cerrados.
       </p>
     </div>
   );

@@ -141,6 +141,8 @@ export const trades = sqliteTable(
     stopLoss: real("stop_loss"),
     profitTarget: real("profit_target"),
     reviewedAt: text("reviewed_at"),
+    /** Psicología del trade (chips), JSON. */
+    psychJson: text("psych_json"),
   },
   (table) => [
     index("trades_account_closed").on(table.accountId, table.closedAt),
@@ -154,6 +156,8 @@ export const journalDays = sqliteTable("journal_days", {
   /** "YYYY-MM-DD" in the journal's display timezone. */
   date: text("date").primaryKey(),
   note: text("note").notNull().default(""),
+  /** Psicología del día (chips), JSON. */
+  psychJson: text("psych_json"),
   updatedAt: text("updated_at").notNull(),
 });
 

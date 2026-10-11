@@ -16,6 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RichEditor, type RichEditorHandle } from "@/components/rich-editor";
 import { Attachments } from "@/components/attachments";
 import { ReviewExport } from "@/components/review-export";
+import { PsychCard } from "@/components/psych-card";
+import { DAY_PSYCH_GROUPS, type PsychValues } from "@/lib/psychology";
 import { useAutosave } from "@/lib/use-autosave";
 import { useApi } from "@/lib/use-api";
 import { fmtMoney, fmtNumber, fmtPercent } from "@/lib/utils";
@@ -38,6 +40,7 @@ interface DayPayload {
   trades: TradeRowLite[];
   intraday: IntradayPoint[];
   note: string;
+  psych: PsychValues;
 }
 
 export default function JournalDayPage({ params }: { params: Promise<{ date: string }> }) {
@@ -179,72 +182,88 @@ function JournalDay({ date }: { date: string }) {
           {!data && <Skeleton className="h-64" />}
         </div>
 
-        <Card className="h-fit">
-          <CardHeader className="flex-row flex-wrap items-center justify-between gap-2">
-            <CardTitle>Nota del día</CardTitle>
-            <div className="flex items-center gap-2">
-              <VoiceNote
-                onPrepare={() => noteEditor.current?.focus()}
-                onText={(text) =>
-                  scheduleSave(
-                    noteValue ? `${noteValue}${noteValue.endsWith(" ") ? "" : " "}${text}` : text,
-                  )
-                }
-              />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-3 text-xs text-muted-foreground">
-              Esta nota es común a todas las cuentas. Los resúmenes con IA usan los filtros
-              seleccionados y añaden una sección con su título. Las notas compartidas no se incluyen
-              en el contexto filtrado de la IA.
-            </p>
-            <div className="mb-3">
-              <AiRecap
-                key={`${date}:${timeZone}:${query}`}
-                date={date}
-                filters={filters}
-                timeZone={timeZone}
-                disabled={!data || !m?.closedTrades}
-                onRecap={({ recap, scope }) => {
-                  // Append to the current draft, including edits made while AI was running.
-                  const section = `## Resumen IA\n\n${scope.label.replace(/[\\`*_{}\[\]<>#]/g, "").replace(/[\r\n]+/g, " ")}\n\n${recap}`;
-                  scheduleSave(
-                    latestNote.current ? `${latestNote.current}\n\n---\n\n${section}` : section,
-                  );
+        <div className="min-w-0 space-y-3">
+          {data ? (
+            <PsychCard
+              key={`psych-${date}`}
+              title="Psicología del día"
+              description="Común a todas las cuentas, igual que la nota del día."
+              groups={DAY_PSYCH_GROUPS}
+              initial={data.psych ?? {}}
+              url={`/api/journal/${date}`}
+              method="PUT"
+              notePlaceholder="Cómo llegaste al día, qué te afectó…"
+            />
+          ) : (
+            <Skeleton className="h-56" />
+          )}
+          <Card className="h-fit">
+            <CardHeader className="flex-row flex-wrap items-center justify-between gap-2">
+              <CardTitle>Nota del día</CardTitle>
+              <div className="flex items-center gap-2">
+                <VoiceNote
+                  onPrepare={() => noteEditor.current?.focus()}
+                  onText={(text) =>
+                    scheduleSave(
+                      noteValue ? `${noteValue}${noteValue.endsWith(" ") ? "" : " "}${text}` : text,
+                    )
+                  }
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Esta nota es común a todas las cuentas. Los resúmenes con IA usan los filtros
+                seleccionados y añaden una sección con su título. Las notas compartidas no se
+                incluyen en el contexto filtrado de la IA.
+              </p>
+              <div className="mb-3">
+                <AiRecap
+                  key={`${date}:${timeZone}:${query}`}
+                  date={date}
+                  filters={filters}
+                  timeZone={timeZone}
+                  disabled={!data || !m?.closedTrades}
+                  onRecap={({ recap, scope }) => {
+                    // Append to the current draft, including edits made while AI was running.
+                    const section = `## Resumen IA\n\n${scope.label.replace(/[\\`*_{}\[\]<>#]/g, "").replace(/[\r\n]+/g, " ")}\n\n${recap}`;
+                    scheduleSave(
+                      latestNote.current ? `${latestNote.current}\n\n---\n\n${section}` : section,
+                    );
+                  }}
+                />
+              </div>
+              {data ? (
+                <RichEditor editorRef={noteEditor} value={noteValue} onChange={scheduleSave} />
+              ) : error ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {error}
+                </p>
+              ) : (
+                <Skeleton className="h-48" />
+              )}
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span role="status">{saving}</span>
+                <Button variant="ghost" size="sm" onClick={() => void flush()}>
+                  Guardar ahora
+                </Button>
+              </div>
+              <ReviewExport
+                containsFinancialData
+                document={{
+                  title: `Revisión diaria · ${date}`,
+                  subtitle: query ? `Filtros: ${query}` : "Todas las cuentas",
+                  lines: [
+                    `Trades cerrados: ${m?.closedTrades ?? 0} | P&L neto: ${m?.netPnl.toFixed(2) ?? "0.00"}`,
+                    "",
+                    noteValue,
+                  ],
                 }}
               />
-            </div>
-            {data ? (
-              <RichEditor editorRef={noteEditor} value={noteValue} onChange={scheduleSave} />
-            ) : error ? (
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
-            ) : (
-              <Skeleton className="h-48" />
-            )}
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span role="status">{saving}</span>
-              <Button variant="ghost" size="sm" onClick={() => void flush()}>
-                Guardar ahora
-              </Button>
-            </div>
-            <ReviewExport
-              containsFinancialData
-              document={{
-                title: `Revisión diaria · ${date}`,
-                subtitle: query ? `Filtros: ${query}` : "Todas las cuentas",
-                lines: [
-                  `Trades cerrados: ${m?.closedTrades ?? 0} | P&L neto: ${m?.netPnl.toFixed(2) ?? "0.00"}`,
-                  "",
-                  noteValue,
-                ],
-              }}
-            />
-            <Attachments type="day" id={date} />
-          </CardContent>
-        </Card>
+              <Attachments type="day" id={date} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

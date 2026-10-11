@@ -36,6 +36,8 @@ import { RichEditor, type RichEditorHandle } from "@/components/rich-editor";
 import { Attachments } from "@/components/attachments";
 import { ReviewExport } from "@/components/review-export";
 import { RuleChecklist } from "@/components/rule-checklist";
+import { PsychCard } from "@/components/psych-card";
+import { parsePsych, TRADE_PSYCH_GROUPS } from "@/lib/psychology";
 import { useAutosave } from "@/lib/use-autosave";
 import { postJson, useApi } from "@/lib/use-api";
 import { fmtDuration, fmtMoney, fmtNumber, fmtPercent } from "@/lib/utils";
@@ -72,6 +74,7 @@ interface TradeDetail {
   stopLoss: number | null;
   profitTarget: number | null;
   reviewedAt: string | null;
+  psychJson: string | null;
 }
 
 interface ExecutionRow {
@@ -274,6 +277,16 @@ function TradeView({ tradeKey }: { tradeKey: string }) {
 
         <div className="min-w-0 space-y-3">
           <AnnotationsCard key={trade.key} trade={trade} onPatch={patch} />
+          <PsychCard
+            key={`psych-${trade.key}`}
+            title="Psicología"
+            description="Marca cómo estabas y cómo ejecutaste. En Informes → Resumen verás el winrate y el P&L de cada opción."
+            groups={TRADE_PSYCH_GROUPS}
+            initial={parsePsych(trade.psychJson)}
+            url={`/api/trades/${encodeURIComponent(trade.key)}`}
+            method="PATCH"
+            notePlaceholder="Qué sentiste o qué te llevó a entrar…"
+          />
           <RuleChecklist tradeKey={trade.key} playbookId={trade.playbookId} />
           <Card>
             <CardHeader className="flex-row items-center justify-between">

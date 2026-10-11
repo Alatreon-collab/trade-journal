@@ -29,6 +29,12 @@ const createDb = () => {
   if (!executionColumns.some((column) => column.name === "import_metadata_json")) {
     sqlite.exec("ALTER TABLE executions ADD COLUMN import_metadata_json TEXT");
   }
+  // Psicología: columnas añadidas en la versión de Kiko (no borran nada).
+  for (const table of ["trades", "journal_days"]) {
+    const columns = sqlite.pragma(`table_info(${table})`) as { name: string }[];
+    if (!columns.some((column) => column.name === "psych_json"))
+      sqlite.exec(`ALTER TABLE ${table} ADD COLUMN psych_json TEXT`);
+  }
   // Materialize CSV bounds once so connection and range lookups never scan candle JSON.
   const csvColumns = sqlite.pragma("table_info(market_csv_datasets)") as { name: string }[];
   sqlite.transaction(() => {

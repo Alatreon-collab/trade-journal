@@ -185,7 +185,7 @@ it("appends a labeled recap to edits made while generation is pending", async ()
     timeZone: "UTC",
   });
   await act(async () => {
-    const editor = container.querySelector("textarea")!;
+    const editor = [...container.querySelectorAll("textarea")].at(-1)!;
     editor.value = "My newest edit";
     editor.dispatchEvent(new Event("input", { bubbles: true }));
   });

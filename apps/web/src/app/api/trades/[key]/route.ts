@@ -1,4 +1,5 @@
 import { tradeRisk, tradeR, plannedR } from "@luxalgo/journal-core";
+import { sanitizePsych, TRADE_PSYCH_GROUPS } from "@/lib/psychology";
 import { eq } from "drizzle-orm";
 import { db, trades, playbooks, accounts } from "@/db";
 import { bad, handler, ok, requireValue } from "@/server/api";
@@ -44,6 +45,7 @@ interface AnnotateBody {
   stopLoss?: number | null;
   profitTarget?: number | null;
   reviewed?: boolean;
+  psych?: unknown;
 }
 
 export const PATCH = handler(async (request: Request, { params }: Params) => {
@@ -78,6 +80,14 @@ export const PATCH = handler(async (request: Request, { params }: Params) => {
     !body.playbookId || db.select().from(playbooks).where(eq(playbooks.id, body.playbookId)).get(),
     "Playbook not found.",
   );
+  let psych: ReturnType<typeof sanitizePsych> | undefined;
+  if (body.psych !== undefined) {
+    try {
+      psych = sanitizePsych(body.psych, TRADE_PSYCH_GROUPS);
+    } catch (error) {
+      return bad((error as Error).message);
+    }
+  }
   const patch: Partial<typeof trades.$inferInsert> = {};
   if (body.notes !== undefined) patch.notes = body.notes;
   if (body.tags !== undefined) patch.tagsJson = JSON.stringify(body.tags);
@@ -87,6 +97,7 @@ export const PATCH = handler(async (request: Request, { params }: Params) => {
   if (body.stopLoss !== undefined) patch.stopLoss = body.stopLoss;
   if (body.profitTarget !== undefined) patch.profitTarget = body.profitTarget;
   if (body.reviewed !== undefined) patch.reviewedAt = body.reviewed ? nowIso() : null;
+  if (psych !== undefined) patch.psychJson = psych ? JSON.stringify(psych) : null;
 
   if (!Object.keys(patch).length) return ok({ updated: true });
   db.update(trades).set(patch).where(eq(trades.key, decoded)).run();

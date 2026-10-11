@@ -8,6 +8,7 @@ import {
   bySymbol,
   byTag,
   byWeekday,
+  bucketBy,
   calendarMonthFromDays,
   computeEdgeScore,
   computeOverview,
@@ -20,6 +21,7 @@ import { calendarRunningPnl } from "@/lib/calendar-insights";
 import { handler, ok } from "@/server/api";
 import { getTimeZone } from "@/server/settings";
 import { queryTrades, type TradeFilters } from "@/server/trades-query";
+import { parsePsych, psychKeys, psychKeyOrder, sessionOf, sessionOrder } from "@/lib/psychology";
 
 /** The entire dashboard in one request. */
 export const GET = handler(async (request: Request) => {
@@ -27,7 +29,8 @@ export const GET = handler(async (request: Request) => {
   const timeZone = getTimeZone();
   const filters: TradeFilters = readFilters(url.searchParams);
 
-  const { trades } = queryTrades(filters);
+  const { rows, trades } = queryTrades(filters);
+  const psychByKey = new Map(rows.map((row) => [row.key, parsePsych(row.psychJson)]));
   const accountRows = db.select().from(accounts).orderBy(asc(accounts.createdAt)).all();
   const selected = filters.accounts
     ? accountRows.filter((a) => filters.accounts!.split(",").includes(a.id))
@@ -77,6 +80,12 @@ export const GET = handler(async (request: Request) => {
       hour: byHour(trades, timeZone),
       duration: byDuration(trades),
       direction: byDirection(trades),
+      session: bucketBy(trades, (t) => [sessionOf(t.openedAt)]).sort(
+        (a, b) => sessionOrder(a.key) - sessionOrder(b.key),
+      ),
+      psych: bucketBy(trades, (t) => psychKeys(psychByKey.get(t.key))).sort(
+        (a, b) => psychKeyOrder(a.key) - psychKeyOrder(b.key),
+      ),
     },
     openPositions: trades
       .filter((t) => t.status === "open")

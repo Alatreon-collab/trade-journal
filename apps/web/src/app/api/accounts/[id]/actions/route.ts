@@ -82,7 +82,8 @@ export const POST = handler(async (request: Request, { params }: Params) => {
           source.rating !== null ||
           source.stopLoss !== null ||
           source.profitTarget !== null ||
-          source.reviewedAt;
+          source.reviewedAt ||
+          source.psychJson;
         if (!hasAnnotations) continue;
         const newKey = destinationId + source.key.slice(id.length);
         db.update(trades)
@@ -95,6 +96,7 @@ export const POST = handler(async (request: Request, { params }: Params) => {
             stopLoss: source.stopLoss,
             profitTarget: source.profitTarget,
             reviewedAt: source.reviewedAt,
+            psychJson: source.psychJson,
           })
           .where(eq(trades.key, newKey))
           .run();

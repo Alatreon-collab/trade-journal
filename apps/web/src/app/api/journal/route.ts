@@ -5,6 +5,7 @@ import { db, journalDays } from "@/db";
 import { handler, ok } from "@/server/api";
 import { getTimeZone } from "@/server/settings";
 import { queryTrades } from "@/server/trades-query";
+import { DAY_PSYCH_GROUPS, parsePsych } from "@/lib/psychology";
 
 /**
  * The journal chronology: every day that has trades OR a note, newest first.
@@ -32,6 +33,10 @@ export const GET = handler(async (request: Request) => {
       stats: tradeDays.get(date) ?? null,
       hasNote: (noteDays.get(date)?.note ?? "") !== "",
       notePreview: (noteDays.get(date)?.note ?? "").slice(0, 200),
+      mood:
+        DAY_PSYCH_GROUPS[0]!.options.find(
+          (option) => option.value === parsePsych(noteDays.get(date)?.psychJson).mood,
+        )?.label ?? null,
     })),
   });
 });

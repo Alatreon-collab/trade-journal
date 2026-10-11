@@ -55,6 +55,9 @@ const groupInto = (
     .sort((a, b) => b.netPnl - a.netPnl);
 };
 
+/** Agrupación genérica (un trade puede caer en varios grupos). */
+export const bucketBy = groupInto;
+
 export const bySymbol = (trades: AnnotatedTrade[]): BucketStats[] =>
   groupInto(trades, (t) => [t.symbol]);
 

@@ -15,7 +15,8 @@ export const GET = handler(async (request: Request) => {
   return ok({
     timeZone,
     trades: rows.map((row, index) => {
-      const { notes, exitsJson, executionIdsJson, tagsJson, mistakesJson, ...summary } = row;
+      const { notes, exitsJson, executionIdsJson, tagsJson, mistakesJson, psychJson, ...summary } =
+        row;
       return {
         ...(listView ? summary : row),
         tags: trades[index]!.annotations?.tags ?? [],
