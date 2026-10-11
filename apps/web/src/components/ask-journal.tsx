@@ -12,9 +12,9 @@ import { useAiRequest, type AiScope } from "@/lib/use-ai-request";
 import type { AnalysisFilters } from "@luxalgo/journal-core";
 
 const SUGGESTIONS = [
-  "What's my most expensive mistake?",
-  "Which weekday should I stop trading?",
-  "Am I better at longs or shorts?",
+  "¿Cuál es el error que más me cuesta?",
+  "¿Qué día de la semana debería dejar de operar?",
+  "¿Se me dan mejor los longs o los shorts?",
 ];
 
 /** Natural-language questions against your own aggregates — BYO AI provider key. */
@@ -48,11 +48,11 @@ function ScopedAskJournal({ filters, timeZone }: { filters: AnalysisFilters; tim
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ask your journal</CardTitle>
+        <CardTitle>Pregunta a tu journal</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         <p className="text-xs text-muted-foreground">
-          Uses the selected accounts and journal filters. Changing filters clears the answer.
+          Usa las cuentas y filtros seleccionados. Si cambias los filtros, se borra la respuesta.
         </p>
         <form
           className="flex gap-2"
@@ -62,14 +62,14 @@ function ScopedAskJournal({ filters, timeZone }: { filters: AnalysisFilters; tim
           }}
         >
           <Input
-            aria-label="Ask your journal a question"
+            aria-label="Hazle una pregunta a tu journal"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Why do my Monday shorts keep failing?"
+            placeholder="¿Por qué me salen mal los shorts de los lunes?"
           />
           <Button type="submit" disabled={busy || !question.trim()}>
             <Sparkles />
-            {busy ? "Thinking…" : "Ask"}
+            {busy ? "Pensando…" : "Preguntar"}
           </Button>
         </form>
         <div className="flex flex-wrap gap-1.5">

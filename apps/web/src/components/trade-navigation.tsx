@@ -34,12 +34,12 @@ export function TradeNavigation({ tradeKey }: { tradeKey: string }) {
 
   return (
     <nav
-      aria-label="Trade navigation"
+      aria-label="Navegación entre trades"
       className="flex flex-wrap items-center justify-between gap-3 px-4 pt-4"
     >
       <Button asChild variant="ghost" size="sm">
         <Link href={`/trades?${query}`}>
-          <ArrowLeft /> Back to trades
+          <ArrowLeft /> Volver a trades
         </Link>
       </Button>
       <div className="flex flex-wrap items-center gap-2">
@@ -52,49 +52,49 @@ export function TradeNavigation({ tradeKey }: { tradeKey: string }) {
             router.replace(`${tradePath(tradeKey)}?${next}`, { scroll: false });
           }}
         >
-          <SelectTrigger aria-label="Trade navigation scope" className="h-8 w-36 text-xs">
+          <SelectTrigger aria-label="Alcance de la navegación" className="h-8 w-36 text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{query ? "Filtered trades" : "All trades"}</SelectItem>
-            <SelectItem value="account">Same account</SelectItem>
+            <SelectItem value="all">{query ? "Trades filtrados" : "Todos los trades"}</SelectItem>
+            <SelectItem value="account">Misma cuenta</SelectItem>
           </SelectContent>
         </Select>
         <span className="text-xs text-muted-foreground" aria-live="polite">
           {error ? (
             <button onClick={refresh} className="underline">
-              Retry navigation
+              Reintentar
             </button>
           ) : data ? (
             data.position === null ? (
-              "Outside current filters"
+              "Fuera de los filtros actuales"
             ) : (
-              `${data.position} of ${data.total} · By entry time`
+              `${data.position} de ${data.total} · Por hora de entrada`
             )
           ) : (
-            "Loading…"
+            "Cargando…"
           )}
         </span>
         {data?.prevKey ? (
           <Button asChild variant="outline" size="sm">
-            <Link href={href(data.prevKey)} aria-label="Previous trade" rel="prev">
-              <ChevronLeft /> Previous
+            <Link href={href(data.prevKey)} aria-label="Trade anterior" rel="prev">
+              <ChevronLeft /> Anterior
             </Link>
           </Button>
         ) : (
-          <Button variant="outline" size="sm" disabled aria-label="Previous trade">
-            <ChevronLeft /> Previous
+          <Button variant="outline" size="sm" disabled aria-label="Trade anterior">
+            <ChevronLeft /> Anterior
           </Button>
         )}
         {data?.nextKey ? (
           <Button asChild variant="outline" size="sm">
-            <Link href={href(data.nextKey)} aria-label="Next trade" rel="next">
-              Next <ChevronRight />
+            <Link href={href(data.nextKey)} aria-label="Trade siguiente" rel="next">
+              Siguiente <ChevronRight />
             </Link>
           </Button>
         ) : (
-          <Button variant="outline" size="sm" disabled aria-label="Next trade">
-            Next <ChevronRight />
+          <Button variant="outline" size="sm" disabled aria-label="Trade siguiente">
+            Siguiente <ChevronRight />
           </Button>
         )}
       </div>

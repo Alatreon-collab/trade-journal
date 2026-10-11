@@ -39,7 +39,7 @@ function CalendarView() {
   return (
     <div>
       <FilterBar
-        title="Calendar"
+        title="Calendario"
         actions={
           <div className="flex items-center gap-1">
             <Button
@@ -47,12 +47,12 @@ function CalendarView() {
               size="icon"
               className="h-8 w-8"
               onClick={() => shift(-1)}
-              aria-label="Previous month"
+              aria-label="Mes anterior"
             >
               <ChevronLeft />
             </Button>
             <span className="w-36 text-center text-sm font-medium">
-              {new Date(Date.UTC(month.year, month.month - 1)).toLocaleString("en-US", {
+              {new Date(Date.UTC(month.year, month.month - 1)).toLocaleString("es-ES", {
                 month: "long",
                 year: "numeric",
                 timeZone: "UTC",
@@ -63,7 +63,7 @@ function CalendarView() {
               size="icon"
               className="h-8 w-8"
               onClick={() => shift(1)}
-              aria-label="Next month"
+              aria-label="Mes siguiente"
             >
               <ChevronRight />
             </Button>
@@ -77,7 +77,7 @@ function CalendarView() {
               <div role="alert" className="space-y-3 py-6 text-sm">
                 <p className="text-destructive">{error}</p>
                 <Button variant="outline" onClick={refresh}>
-                  Try again
+                  Reintentar
                 </Button>
               </div>
             ) : data ? (
@@ -88,7 +88,7 @@ function CalendarView() {
                 runningPnl={data.runningPnl}
               />
             ) : (
-              <div role="status" aria-label="Loading calendar">
+              <div role="status" aria-label="Cargando calendario">
                 <Skeleton className="h-96" />
               </div>
             )}
@@ -104,7 +104,7 @@ function CalendarView() {
         {!data && !error && (
           <div
             role="status"
-            aria-label="Loading performance insights"
+            aria-label="Cargando análisis de rendimiento"
             className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
           >
             {[0, 1, 2, 3].map((index) => (

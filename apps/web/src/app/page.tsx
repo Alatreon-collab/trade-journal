@@ -117,14 +117,14 @@ function DashboardContent({
       <div>
         <div className="space-y-3 p-4">
           <p role="alert" className="text-sm text-destructive">
-            {error ?? "Could not load the dashboard."}
+            {error ?? "No se pudo cargar el dashboard."}
           </p>
           <button
             type="button"
             className="rounded-md border px-3 py-2 text-sm hover:bg-accent"
             onClick={refresh}
           >
-            Try again
+            Reintentar
           </button>
         </div>
       </div>
@@ -135,7 +135,8 @@ function DashboardContent({
     return query ? (
       <div>
         <p className="p-12 text-center text-sm text-muted-foreground">
-          No trades match these filters. Clear or adjust Filters to see more results.
+          Ningún trade coincide con estos filtros. Quita o ajusta los filtros para ver más
+          resultados.
         </p>
       </div>
     ) : (
@@ -175,15 +176,15 @@ function DashboardContent({
         widgets={[
           {
             id: "widget-0",
-            label: "Net P&L",
+            label: "P&L neto",
             size: "small",
             layoutGroup: "summary",
             content: (
               <Card className="h-full">
                 <StatHeader
-                  title="Net P&L"
+                  title="P&L neto"
                   icon={CircleDollarSign}
-                  hint="Realized profit and loss net of fees, over the selected range."
+                  hint="Beneficio o pérdida realizado, neto de comisiones, en el rango seleccionado."
                 />
                 <CardContent>
                   <Pnl value={m.netPnl} className="text-3xl font-semibold tracking-tight" />
@@ -198,12 +199,12 @@ function DashboardContent({
                       <MonetaryValue>
                         {fmtMoney(Math.abs(weekDelta)).replace("+", "")}
                       </MonetaryValue>{" "}
-                      vs prior 7d
+                      vs 7d anteriores
                     </div>
                   )}
                   <div className="mt-1 text-xs text-muted-foreground">
-                    {m.closedTrades} closed trades ·{" "}
-                    <MonetaryValue>{fmtMoney(m.fees)}</MonetaryValue> fees
+                    {m.closedTrades} trades cerrados ·{" "}
+                    <MonetaryValue>{fmtMoney(m.fees)}</MonetaryValue> comisiones
                   </div>
                 </CardContent>
               </Card>
@@ -211,18 +212,18 @@ function DashboardContent({
           },
           {
             id: "widget-1",
-            label: "Trade win %",
+            label: "% trades ganadores",
             size: "small",
             layoutGroup: "summary",
             content: (
               <Card className="h-full">
                 <StatHeader
-                  title="Trade win %"
+                  title="% trades ganadores"
                   icon={Target}
-                  hint="Winning trades divided by all closed trades, including breakevens."
+                  hint="Trades ganadores entre todos los trades cerrados, incluidos los breakeven."
                 />
                 <CardContent className="flex items-center justify-between gap-2">
-                  <Gauge value={m.winRate} label="Trade win rate" />
+                  <Gauge value={m.winRate} label="Winrate por trade" />
                   <div className="space-y-0.5 text-xs text-muted-foreground">
                     <div>{m.wins} W</div>
                     <div>{m.breakevens} BE</div>
@@ -242,7 +243,7 @@ function DashboardContent({
                 <StatHeader
                   title="Profit factor"
                   icon={Scale}
-                  hint="Gross profit ÷ gross loss. Above 1 means the wins outweigh the losses."
+                  hint="Beneficio bruto ÷ pérdida bruta. Por encima de 1, las ganancias superan a las pérdidas."
                 />
                 <CardContent>
                   <div className="text-3xl font-semibold tracking-tight tnum">
@@ -253,7 +254,7 @@ function DashboardContent({
                         : fmtNumber(m.profitFactor)}
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
-                    gross profit ÷ gross loss
+                    beneficio bruto ÷ pérdida bruta
                   </div>
                 </CardContent>
               </Card>
@@ -261,34 +262,34 @@ function DashboardContent({
           },
           {
             id: "widget-3",
-            label: "Day win %",
+            label: "% días ganadores",
             size: "small",
             layoutGroup: "summary",
             content: (
               <Card className="h-full">
                 <StatHeader
-                  title="Day win %"
+                  title="% días ganadores"
                   icon={CalendarCheck2}
-                  hint="Green trading days ÷ all trading days in the selected range."
+                  hint="Días en verde ÷ todos los días operados en el rango seleccionado."
                 />
                 <CardContent className="flex items-center justify-between gap-2">
-                  <Gauge value={m.dayWinRate} label="Day win rate" />
-                  <div className="text-xs text-muted-foreground">{m.tradingDays} days</div>
+                  <Gauge value={m.dayWinRate} label="Winrate por día" />
+                  <div className="text-xs text-muted-foreground">{m.tradingDays} días</div>
                 </CardContent>
               </Card>
             ),
           },
           {
             id: "widget-4",
-            label: "Avg win / loss",
+            label: "Ganancia / pérdida media",
             size: "small",
             layoutGroup: "summary",
             content: (
               <Card className="h-full">
                 <StatHeader
-                  title="Avg win / loss"
+                  title="Ganancia / pérdida media"
                   icon={ArrowUpDown}
-                  hint="Average winning trade ÷ average losing trade. The bar shows the two to scale."
+                  hint="Trade ganador medio ÷ trade perdedor medio. La barra muestra ambos a escala."
                 />
                 <CardContent>
                   <div className="text-3xl font-semibold tracking-tight tnum">
@@ -298,7 +299,7 @@ function DashboardContent({
                     <div
                       className="journal-progress-visual mt-2 flex h-1.5 gap-0.5"
                       role="img"
-                      aria-label="Average win vs average loss, to scale"
+                      aria-label="Ganancia media frente a pérdida media, a escala"
                     >
                       <span
                         className="rounded-full bg-profit"
@@ -317,7 +318,7 @@ function DashboardContent({
                         <MonetaryValue>{fmtMoney(m.avgWin)}</MonetaryValue>
                       )}
                     </span>
-                    {" avg win · "}
+                    {" ganancia media · "}
                     <span className="text-loss">
                       {m.avgLoss === null ? (
                         "–"
@@ -325,7 +326,7 @@ function DashboardContent({
                         <MonetaryValue>{fmtMoney(-m.avgLoss)}</MonetaryValue>
                       )}
                     </span>
-                    {" avg loss"}
+                    {" pérdida media"}
                   </div>
                 </CardContent>
               </Card>
@@ -342,8 +343,9 @@ function DashboardContent({
                   <div className="flex min-w-0 items-center gap-1">
                     <CardTitle>Edge Score</CardTitle>
                     <HelpHint heading="Edge Score">
-                      A 0–100 score combining win rate, profit factor, average win/loss, drawdown,
-                      recovery, and consistency. Requires at least five closed trades.
+                      Puntuación de 0 a 100 que combina winrate, profit factor, ganancia/pérdida
+                      media, drawdown, recuperación y consistencia. Necesita al menos cinco trades
+                      cerrados.
                     </HelpHint>
                   </div>
                   <span className="text-2xl font-semibold tracking-tight tnum">
@@ -358,14 +360,14 @@ function DashboardContent({
                 <CardContent className="dashboard-visual-card-content">
                   {edgeScore.score === null ? (
                     <p className="py-8 text-center text-sm text-muted-foreground">
-                      Needs 5+ closed trades. The formula is open —{" "}
+                      Necesita 5 o más trades cerrados. La fórmula es pública:{" "}
                       <a
                         className="underline"
                         href="https://github.com/LuxAlgo/trade-journal/blob/main/docs/edge-score.md"
                         target="_blank"
                         rel="noreferrer"
                       >
-                        read it
+                        léela aquí
                       </a>
                       .
                     </p>
@@ -378,16 +380,16 @@ function DashboardContent({
           },
           {
             id: "widget-6",
-            label: "Cumulative P&L",
+            label: "P&L acumulado",
             size: "medium",
             layoutGroup: "visuals",
             content: (
               <Card className="dashboard-visual-card h-full">
                 <CardHeader className="flex-row items-center justify-between">
-                  <CardTitle>Daily net cumulative P&L</CardTitle>
-                  <HelpHint heading="Cumulative P&L">
-                    Running total of net profit and loss over the selected period. The drawdown bars
-                    below show declines from the running equity peak.
+                  <CardTitle>P&L neto acumulado por día</CardTitle>
+                  <HelpHint heading="P&L acumulado">
+                    Suma acumulada del P&L neto en el periodo seleccionado. Las barras de drawdown
+                    de abajo muestran las caídas desde el máximo de equity.
                   </HelpHint>
                 </CardHeader>
                 <CardContent>
@@ -403,16 +405,16 @@ function DashboardContent({
           },
           {
             id: "widget-7",
-            label: "Daily P&L",
+            label: "P&L diario",
             size: "medium",
             layoutGroup: "visuals",
             content: (
               <Card className="dashboard-visual-card h-full">
                 <CardHeader className="flex-row items-center justify-between">
-                  <CardTitle>Net daily P&L</CardTitle>
-                  <HelpHint heading="Daily P&L">
-                    Net profit or loss for each trading day. Bars above zero are profitable; bars
-                    below zero are losses.
+                  <CardTitle>P&L neto diario</CardTitle>
+                  <HelpHint heading="P&L diario">
+                    Beneficio o pérdida neta de cada día operado. Las barras por encima de cero son
+                    días en positivo; las de debajo, días en pérdida.
                   </HelpHint>
                 </CardHeader>
                 <CardContent className="dashboard-visual-card-content">
@@ -426,7 +428,7 @@ function DashboardContent({
           },
           {
             id: "widget-8",
-            label: "Calendar",
+            label: "Calendario",
             size: "wide",
             layoutGroup: "detail",
             content: (
@@ -434,7 +436,7 @@ function DashboardContent({
                 <CardHeader className="flex-row items-center justify-between">
                   <CardTitle>
                     {new Date(Date.UTC(data.calendar.year, data.calendar.month - 1)).toLocaleString(
-                      "en-US",
+                      "es-ES",
                       { month: "long", year: "numeric", timeZone: "UTC" },
                     )}
                   </CardTitle>
@@ -442,7 +444,7 @@ function DashboardContent({
                     href={`/calendar?${query}`}
                     className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
                   >
-                    Full calendar
+                    Calendario completo
                   </Link>
                 </CardHeader>
                 <CardContent>
@@ -458,26 +460,28 @@ function DashboardContent({
           },
           {
             id: "widget-9",
-            label: "Activity",
+            label: "Actividad",
             size: "medium",
             layoutGroup: "detail",
             content: (
               <Card className="h-full">
                 <CardHeader>
-                  <CardTitle>Activity</CardTitle>
+                  <CardTitle>Actividad</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Tabs defaultValue="recent">
                     <TabsList className="h-8">
                       <TabsTrigger value="recent" className="text-xs">
-                        Recent trades
+                        Trades recientes
                       </TabsTrigger>
                       <TabsTrigger value="open" className="text-xs">
-                        Open positions
+                        Posiciones abiertas
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="recent" className="space-y-1">
-                      {data.recentTrades.length === 0 && <Empty label="No closed trades yet" />}
+                      {data.recentTrades.length === 0 && (
+                        <Empty label="Aún no hay trades cerrados" />
+                      )}
                       {data.recentTrades.map((trade) => (
                         <Link
                           key={trade.key}
@@ -509,7 +513,7 @@ function DashboardContent({
                     </TabsContent>
                     <TabsContent value="open" className="space-y-1">
                       {data.openPositions.length === 0 && (
-                        <Empty label="Flat — no open positions" />
+                        <Empty label="Flat: sin posiciones abiertas" />
                       )}
                       {data.openPositions.map((position) => (
                         <div
@@ -534,15 +538,15 @@ function DashboardContent({
           },
           {
             id: "widget-10",
-            label: "Max drawdown",
+            label: "Drawdown máximo",
             size: "small",
             layoutGroup: "secondary",
             content: (
               <Card className="h-full">
                 <StatHeader
-                  title="Max drawdown"
+                  title="Drawdown máximo"
                   icon={TrendingDown}
-                  hint="Largest peak-to-trough drop of the cumulative P&L curve."
+                  hint="Mayor caída desde un máximo hasta un mínimo de la curva de P&L acumulado."
                 />
                 <CardContent>
                   <div className="text-xl font-semibold tnum text-loss">
@@ -550,9 +554,9 @@ function DashboardContent({
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
                     {m.maxDrawdownPct === null
-                      ? "set an initial balance for %"
+                      ? "pon un saldo inicial para ver el %"
                       : fmtPercent(m.maxDrawdownPct)}
-                    {m.recoveryFactor !== null && ` · recovery ${fmtNumber(m.recoveryFactor)}x`}
+                    {m.recoveryFactor !== null && ` · recuperación ${fmtNumber(m.recoveryFactor)}x`}
                   </div>
                 </CardContent>
               </Card>
@@ -560,15 +564,15 @@ function DashboardContent({
           },
           {
             id: "widget-11",
-            label: "Streaks",
+            label: "Rachas",
             size: "small",
             layoutGroup: "secondary",
             content: (
               <Card className="h-full">
                 <StatHeader
-                  title="Streaks"
+                  title="Rachas"
                   icon={Flame}
-                  hint="Current run of consecutive wins (W) or losses (L), with the best and worst runs."
+                  hint="Racha actual de ganadores (W) o perdedores (L) seguidos, con la mejor y la peor racha."
                 />
                 <CardContent>
                   <div className="text-xl font-semibold tnum">
@@ -579,7 +583,7 @@ function DashboardContent({
                         : "–"}
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
-                    best {m.maxWinStreak}W · worst {m.maxLossStreak}L
+                    mejor {m.maxWinStreak}W · peor {m.maxLossStreak}L
                   </div>
                 </CardContent>
               </Card>
@@ -587,15 +591,15 @@ function DashboardContent({
           },
           {
             id: "widget-12",
-            label: "Expectancy / trade",
+            label: "Esperanza / trade",
             size: "small",
             layoutGroup: "secondary",
             content: (
               <Card className="h-full">
                 <StatHeader
-                  title="Expectancy / trade"
+                  title="Esperanza / trade"
                   icon={Sigma}
-                  hint="Average net P&L per closed trade: what one more trade is worth on your numbers."
+                  hint="P&L neto medio por trade cerrado: lo que vale un trade más según tus números."
                 />
                 <CardContent>
                   {m.expectancy === null ? (
@@ -605,8 +609,8 @@ function DashboardContent({
                   )}
                   <div className="mt-1 text-xs text-muted-foreground">
                     {m.avgRealizedR !== null && m.tradesWithRisk > 0
-                      ? `avg ${fmtNumber(m.avgRealizedR)}R over ${m.tradesWithRisk} risk-tagged trades`
-                      : "tag stop-losses to unlock R multiples"}
+                      ? `media ${fmtNumber(m.avgRealizedR)}R en ${m.tradesWithRisk} trades con riesgo marcado`
+                      : "marca los stop loss para ver los múltiplos de R"}
                   </div>
                 </CardContent>
               </Card>
@@ -614,20 +618,20 @@ function DashboardContent({
           },
           {
             id: "widget-13",
-            label: "Avg duration",
+            label: "Duración media",
             size: "small",
             layoutGroup: "secondary",
             content: (
               <Card className="h-full">
                 <StatHeader
-                  title="Avg duration"
+                  title="Duración media"
                   icon={Timer}
-                  hint="Average time from first entry fill to final exit."
+                  hint="Tiempo medio desde la primera ejecución de entrada hasta la salida final."
                 />
                 <CardContent>
                   <div className="text-xl font-semibold tnum">{fmtDuration(m.avgDurationMs)}</div>
                   <div className="mt-1 text-xs text-muted-foreground">
-                    winners vs losers in Reports
+                    ganadores vs perdedores en Informes
                   </div>
                 </CardContent>
               </Card>
@@ -635,15 +639,15 @@ function DashboardContent({
           },
           {
             id: "widget-14",
-            label: "Best / worst day",
+            label: "Mejor / peor día",
             size: "small",
             layoutGroup: "secondary",
             content: (
               <Card className="h-full">
                 <StatHeader
-                  title="Best / worst day"
+                  title="Mejor / peor día"
                   icon={Trophy}
-                  hint="Highest and lowest single-day net P&L in the selected range."
+                  hint="P&L neto más alto y más bajo de un solo día en el rango seleccionado."
                 />
                 <CardContent className="space-y-1">
                   {bestDay && (
@@ -666,16 +670,16 @@ function DashboardContent({
           },
           {
             id: "widget-15",
-            label: "Trade time performance",
+            label: "Rendimiento por hora",
             size: "full",
             layoutGroup: "full",
             content: (
               <Card className="h-full">
                 <CardHeader className="flex-row items-center justify-between">
-                  <CardTitle>Trade time performance</CardTitle>
-                  <HelpHint heading="Trade time performance">
-                    Trades grouped by their opening hour. The upper chart shows net P&L; the lower
-                    chart shows trade count.
+                  <CardTitle>Rendimiento por hora</CardTitle>
+                  <HelpHint heading="Rendimiento por hora">
+                    Trades agrupados por su hora de apertura. El gráfico de arriba muestra el P&L
+                    neto; el de abajo, el número de trades.
                   </HelpHint>
                 </CardHeader>
                 <CardContent>
@@ -710,7 +714,7 @@ function StatHeader({
     <CardHeader className="flex-row items-center justify-between space-y-0">
       <CardTitle>{title}</CardTitle>
       <Tooltip>
-        <TooltipTrigger className="cursor-help" aria-label={`About ${title}`}>
+        <TooltipTrigger className="cursor-help" aria-label={`Sobre ${title}`}>
           <Icon className="h-3.5 w-3.5 text-muted-foreground/70" />
         </TooltipTrigger>
         <TooltipContent>
@@ -740,28 +744,28 @@ function EmptyState() {
   return (
     <div>
       <div className="flex flex-col items-center justify-center gap-3 px-4 py-24 text-center">
-        <h2 className="text-xl font-semibold">Your journal is empty</h2>
+        <h2 className="text-xl font-semibold">Tu journal está vacío</h2>
         <p className="max-w-md text-sm text-muted-foreground">
-          Connect a broker for automatic sync, upload a statement from 10+ platforms (including your
-          TradeZella export), or add trades manually.
+          Conecta un bróker para sincronizar automáticamente, sube un extracto de más de 10
+          plataformas (incluida tu exportación de TradeZella) o añade trades a mano.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Link
             href="/import"
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
-            Import your first trades
+            Importa tus primeros trades
           </Link>
           <button
             onClick={loadDemo}
             disabled={loadingDemo}
             className="rounded-md border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
           >
-            {loadingDemo ? "Loading…" : "Load demo data"}
+            {loadingDemo ? "Cargando…" : "Cargar datos de demo"}
           </button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Demo data lands in its own account; delete it anytime under Accounts.
+          Los datos de demo van a su propia cuenta; puedes borrarlos cuando quieras desde Cuentas.
         </p>
       </div>
     </div>

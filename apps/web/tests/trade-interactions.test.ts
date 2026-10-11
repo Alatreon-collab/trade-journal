@@ -41,19 +41,21 @@ it("previews all stars up to the hovered or focused rating without saving", asyn
   const save = vi.fn().mockResolvedValue(undefined);
   await act(async () => root.render(createElement(TradeRating, { value: 2, onChange: save })));
   await act(async () =>
-    button("Rate 4 stars").dispatchEvent(new MouseEvent("pointerover", { bubbles: true })),
+    button("Valorar con 4 estrellas").dispatchEvent(
+      new MouseEvent("pointerover", { bubbles: true }),
+    ),
   );
   expect(filled()).toBe(4);
   expect(save).not.toHaveBeenCalled();
   await act(async () =>
-    button("Rate 4 stars").dispatchEvent(
+    button("Valorar con 4 estrellas").dispatchEvent(
       new MouseEvent("pointerout", { bubbles: true, relatedTarget: document.body }),
     ),
   );
   expect(filled()).toBe(2);
-  await act(async () => button("Rate 5 stars").focus());
+  await act(async () => button("Valorar con 5 estrellas").focus());
   expect(filled()).toBe(5);
-  await act(async () => button("Rate 5 stars").blur());
+  await act(async () => button("Valorar con 5 estrellas").blur());
   expect(filled()).toBe(2);
 });
 
@@ -66,21 +68,21 @@ it("animates the selection immediately and restores the saved value if saving fa
       }),
   );
   await act(async () => root.render(createElement(TradeRating, { value: 2, onChange: save })));
-  await act(async () => button("Rate 4 stars").click());
+  await act(async () => button("Valorar con 4 estrellas").click());
   expect(save).toHaveBeenCalledWith(4);
   expect(filled()).toBe(4);
   expect(container.querySelectorAll(".journal-rating-selected")).toHaveLength(4);
   await act(async () => reject(new Error("offline")));
   expect(filled()).toBe(2);
-  expect(container.querySelector('[role="alert"]')?.textContent).toContain("not saved");
+  expect(container.querySelector('[role="alert"]')?.textContent).toContain("No se guardó");
 });
 
 it("saves a rating and allows selecting it again to clear it", async () => {
   const save = vi.fn().mockResolvedValue(undefined);
   await act(async () => root.render(createElement(TradeRating, { value: null, onChange: save })));
-  await act(async () => button("Rate 3 stars").click());
-  expect(button("Rate 3 stars").getAttribute("aria-pressed")).toBe("true");
-  await act(async () => button("Rate 3 stars").click());
+  await act(async () => button("Valorar con 3 estrellas").click());
+  expect(button("Valorar con 3 estrellas").getAttribute("aria-pressed")).toBe("true");
+  await act(async () => button("Valorar con 3 estrellas").click());
   expect(save.mock.calls.map(([value]) => value)).toEqual([3, null]);
   expect(filled()).toBe(0);
 });
@@ -127,27 +129,27 @@ const renderReplay = async (privacy = false) =>
     ),
   );
 const count = () =>
-  container.querySelector<HTMLInputElement>('[aria-label="Replay position"]')!.value;
+  container.querySelector<HTMLInputElement>('[aria-label="Posición del replay"]')!.value;
 it("reveals Vela after readiness and steps backwards and forwards without future candles", async () => {
   await renderReplay();
   expect(container.querySelector(".journal-replay-reveal")).toBeTruthy();
   expect(count()).toBe("3");
-  expect(button("Next candle").disabled).toBe(true);
-  await act(async () => button("Previous candle").click());
+  expect(button("Vela siguiente").disabled).toBe(true);
+  await act(async () => button("Vela anterior").click());
   expect(count()).toBe("2");
   expect(chart.setMarket.mock.calls.at(-1)?.[0].data).toEqual(history.bars.slice(0, 2));
-  await act(async () => button("Previous candle").click());
+  await act(async () => button("Vela anterior").click());
   expect(count()).toBe("1");
-  expect(button("Previous candle").disabled).toBe(true);
-  await act(async () => button("Next candle").click());
+  expect(button("Vela anterior").disabled).toBe(true);
+  await act(async () => button("Vela siguiente").click());
   expect(count()).toBe("2");
-  await act(async () => button("Show all candles").click());
+  await act(async () => button("Mostrar todas las velas").click());
   expect(count()).toBe("3");
-  await act(async () => button("Restart replay").click());
+  await act(async () => button("Reiniciar replay").click());
   expect(count()).toBe("1");
 });
 it("hides the historical chart and controls in privacy mode", async () => {
   await renderReplay(true);
-  expect(container.querySelector('[aria-label="Replay position"]')).toBeNull();
-  expect(container.textContent).toContain("hidden in privacy mode");
+  expect(container.querySelector('[aria-label="Posición del replay"]')).toBeNull();
+  expect(container.textContent).toContain("se ocultan en modo privado");
 });

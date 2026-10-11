@@ -30,11 +30,11 @@ export function CalendarDayPreview({
   return (
     <div className="w-64 max-w-full">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-xs">Running P&L</span>
+        <span className="text-xs">P&L acumulado</span>
         {monetary ? (
           <Pnl value={total} currency={currency} className="text-sm font-semibold" />
         ) : (
-          <span className="text-xs">Multiple currencies</span>
+          <span className="text-xs">Varias divisas</span>
         )}
       </div>
       {monetary && points.length > 0 ? (
@@ -42,7 +42,7 @@ export function CalendarDayPreview({
           <svg
             viewBox="0 0 264 100"
             role="img"
-            aria-label={`Running net P&L across ${trades} closed trades`}
+            aria-label={`P&L neto acumulado en ${trades} trades cerrados`}
             className={cn(
               "journal-calendar-pnl-preview my-2 block w-full",
               total > 0 ? "text-profit" : total < 0 ? "text-loss" : "text-muted-foreground",
@@ -69,18 +69,19 @@ export function CalendarDayPreview({
             <circle cx="256" cy={y(points.at(-1)!.cumNetPnl)} r="3" fill="currentColor" />
           </svg>
           <div className="flex justify-between text-[10px]">
-            <span>Before first close</span>
-            <span>After last close</span>
+            <span>Antes del primer cierre</span>
+            <span>Tras el último cierre</span>
           </div>
           <p className="mt-2 text-[11px]">
-            {trades} closed trade{trades === 1 ? "" : "s"} · Net of fees
+            {trades} trade{trades === 1 ? "" : "s"} cerrado{trades === 1 ? "" : "s"} · Neto de
+            comisiones
           </p>
         </>
       ) : (
         <p className="mt-3 text-xs">
           {!monetary
-            ? "Select accounts with one currency to view the running P&L."
-            : "No closed trades on this day."}
+            ? "Selecciona cuentas con una sola divisa para ver el P&L acumulado."
+            : "No hay trades cerrados este día."}
         </p>
       )}
     </div>

@@ -10,7 +10,7 @@ import { formatDateInput, parseDateInput } from "@/lib/date-input";
 
 // The calendar is loaded on demand, not in every page's initial filter-bar bundle.
 const Calendar = dynamic(() => import("./calendar").then((module) => module.Calendar), {
-  loading: () => <div role="status" aria-label="Loading calendar" className="h-[300px]" />,
+  loading: () => <div role="status" aria-label="Cargando calendario" className="h-[300px]" />,
 });
 
 export function DatePicker({
@@ -54,7 +54,7 @@ export function DatePicker({
             aria-label={label}
             aria-invalid={invalid || undefined}
             aria-describedby={invalid ? errorId : undefined}
-            placeholder="YYYY-MM-DD"
+            placeholder="AAAA-MM-DD"
             disabled={disabled}
             className="journal-date-input pr-10 tabular-nums"
             onChange={(event) => {
@@ -79,7 +79,7 @@ export function DatePicker({
             <button
               type="button"
               disabled={disabled}
-              aria-label={`Choose ${label.toLowerCase()} date`}
+              aria-label={`Elegir fecha: ${label.toLowerCase()}`}
               className="absolute top-0 right-0 flex size-9 items-center justify-center rounded-r-md text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
             >
               <CalendarDays aria-hidden="true" className="size-4" />
@@ -87,15 +87,15 @@ export function DatePicker({
           </Popover.Trigger>
           {invalid && (
             <span id={errorId} role="alert" className="mt-1 block text-xs text-destructive">
-              Enter a valid date (YYYY-MM-DD){max ? ` on or before ${max}` : ""}
-              {min ? ` on or after ${min}` : ""}.
+              Introduce una fecha válida (AAAA-MM-DD){max ? ` igual o anterior a ${max}` : ""}
+              {min ? ` igual o posterior a ${min}` : ""}.
             </span>
           )}
         </span>
       </Popover.Anchor>
       <Popover.Portal>
         <Popover.Content
-          aria-label={`${label} calendar`}
+          aria-label={`Calendario: ${label}`}
           align="start"
           sideOffset={8}
           collisionPadding={12}

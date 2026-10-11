@@ -66,7 +66,9 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
       });
       onSaved();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Couldn’t save the trade. Try again.");
+      setError(
+        cause instanceof Error ? cause.message : "No se pudo guardar el trade. Inténtalo de nuevo.",
+      );
     } finally {
       setBusy(false);
     }
@@ -77,13 +79,13 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
       <AccountPicker value={accountId} onChange={setAccountId} kind="manual" />
       <div>
         <Label htmlFor={`${fieldId}-symbol`} className="mb-1 block text-xs text-muted-foreground">
-          Symbol
+          Símbolo
         </Label>
         <Input
           id={`${fieldId}-symbol`}
           value={symbol}
           onChange={(event) => setSymbol(event.target.value.toUpperCase())}
-          placeholder="AAPL, ESZ6, BTCUSDT…"
+          placeholder="MNQZ6, MESZ6, MGCZ6…"
         />
       </div>
       <div className="manual-executions space-y-3">
@@ -92,9 +94,9 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
             key={index}
             className="manual-execution-row grid min-w-0 gap-2 rounded-lg border p-3"
           >
-            <legend className="px-1 text-xs text-muted-foreground">Execution {index + 1}</legend>
+            <legend className="px-1 text-xs text-muted-foreground">Ejecución {index + 1}</legend>
             <label className="manual-execution-date grid min-w-0 gap-1 text-xs text-muted-foreground">
-              Date & time
+              Fecha y hora
               <Input
                 type="datetime-local"
                 value={leg.datetime}
@@ -102,7 +104,7 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
               />
             </label>
             <div className="grid min-w-0 gap-1 text-xs text-muted-foreground">
-              <span id={`${fieldId}-execution-side-${index}`}>Side</span>
+              <span id={`${fieldId}-execution-side-${index}`}>Lado</span>
               <Select
                 value={leg.side}
                 onValueChange={(value) => setLeg(index, { side: value as "buy" | "sell" })}
@@ -111,25 +113,25 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="buy">Buy</SelectItem>
-                  <SelectItem value="sell">Sell</SelectItem>
+                  <SelectItem value="buy">Compra</SelectItem>
+                  <SelectItem value="sell">Venta</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <label className="grid min-w-0 gap-1 text-xs text-muted-foreground">
-              Quantity
+              Cantidad
               <Input
-                placeholder="qty"
+                placeholder="cant."
                 inputMode="decimal"
                 value={leg.quantity}
                 onChange={(event) => setLeg(index, { quantity: event.target.value })}
               />
             </label>
             <label className="grid min-w-0 gap-1 text-xs text-muted-foreground">
-              Price
+              Precio
               <MonetaryField>
                 <Input
-                  placeholder="price"
+                  placeholder="precio"
                   inputMode="decimal"
                   value={leg.price}
                   onChange={(event) => setLeg(index, { price: event.target.value })}
@@ -137,10 +139,10 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
               </MonetaryField>
             </label>
             <label className="grid min-w-0 gap-1 text-xs text-muted-foreground">
-              Fee
+              Comisión
               <MonetaryField>
                 <Input
-                  placeholder="fee"
+                  placeholder="comisión"
                   inputMode="decimal"
                   value={leg.fee}
                   onChange={(event) => setLeg(index, { fee: event.target.value })}
@@ -151,19 +153,19 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
         ))}
       </div>
       <div className="space-y-1">
-        <Label htmlFor={`${fieldId}-notes`}>Notes (optional)</Label>
+        <Label htmlFor={`${fieldId}-notes`}>Notas (opcional)</Label>
         <textarea
           id={`${fieldId}-notes`}
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
           maxLength={100000}
           rows={4}
-          placeholder="Your setup, why you took the trade, or what you learned…"
+          placeholder="Tu setup, por qué entraste o qué aprendiste…"
           className="flex w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
         />
         <p className="text-xs text-muted-foreground">
-          Markdown supported. Notes are saved with the trade; existing notes are kept when adding to
-          an open position.
+          Admite Markdown. Las notas se guardan con el trade; si añades a una posición abierta, se
+          conservan las notas que ya tenía.
         </p>
       </div>
       {error && (
@@ -182,16 +184,16 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
             ])
           }
         >
-          Add execution
+          Añadir ejecución
         </Button>
         <Button size="sm" onClick={save} disabled={!valid || busy}>
-          {busy ? "Saving…" : "Save trade"}
+          {busy ? "Guardando…" : "Guardar trade"}
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Dates and times use your device’s timezone. Executions matching an open position on{" "}
-        {symbol || "the symbol"} are stitched into round trips automatically (
-        {fmtNumber(legs.filter((leg) => leg.datetime).length, 0)} legs so far).
+        Las fechas y horas usan la zona horaria de tu dispositivo. Las ejecuciones que coincidan con
+        una posición abierta en {symbol || "el símbolo"} se unen automáticamente en un trade
+        completo ({fmtNumber(legs.filter((leg) => leg.datetime).length, 0)} ejecuciones por ahora).
       </p>
     </fieldset>
   );

@@ -124,8 +124,41 @@ export const fromMinor = (value: number, currency: string) =>
   (value / 10 ** currencyDigits(currency)).toFixed(currencyDigits(currency));
 export const propMoney = (value: number, currency: string) =>
   currencyFormat(currency).format(value / 10 ** currencyDigits(currency));
+// Textos en español para los valores internos (que se guardan en inglés).
+const LABELS_ES: Record<string, string> = {
+  overview: "Resumen",
+  accounts: "Cuentas",
+  payouts: "Payouts",
+  ledger: "Movimientos",
+  evaluation: "Evaluación",
+  verification: "Verificación",
+  funded: "Fondeada",
+  instant_funded: "Fondeo instantáneo",
+  live: "Live",
+  active: "Activa",
+  passed: "Aprobada",
+  breached: "Quemada",
+  closed: "Cerrada",
+  requested: "Solicitado",
+  approved: "Aprobado",
+  completed: "Completado",
+  rejected: "Rechazado",
+  cancelled: "Cancelado",
+  reset: "Reset",
+  activation: "Activación",
+  subscription: "Suscripción",
+  platform: "Plataforma",
+  market_data: "Datos de mercado",
+  transfer: "Transferencia",
+  other: "Otros",
+  expense: "Gasto",
+  refund: "Reembolso",
+  payout: "Payout",
+  receipt: "Cobro",
+  reversal: "Reversión",
+};
 export const label = (value: string) =>
-  value.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase());
+  LABELS_ES[value] ?? value.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase());
 export const expectedPayout = (entry: PropEntry) =>
   Number((BigInt(entry.amountMinor) * BigInt(entry.splitBps) + 5000n) / 10000n) - entry.feeMinor;
 export const receivedPayout = (id: string, receipts: PropReceipt[]) =>

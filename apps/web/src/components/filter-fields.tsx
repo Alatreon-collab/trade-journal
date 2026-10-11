@@ -9,20 +9,22 @@ import { ChevronDown, CircleHelp } from "lucide-react";
 import { HoverHint } from "./ui/tooltip";
 import { DatePicker } from "./ui/date-picker";
 const FIELD_HINTS: Record<string, string> = {
-  From: "First included date. Closed trades use their closing day; open trades use their opening day.",
-  To: "Last included date. Dates follow the journal time zone.",
-  Strategy: "Include trades assigned to this playbook. All includes trades without a playbook.",
-  "Symbols (comma-separated)":
-    "Include these symbols. Separate multiple symbols with commas, for example AAPL, NVDA.",
-  "Exclude symbols": "Hide these symbols from the results. Separate multiple symbols with commas.",
-  "Required tags (comma-separated)":
-    "Filter by tags recorded on your trades. Separate multiple tags with commas.",
-  "Required mistakes":
-    "Filter by recorded trading mistakes. Separate multiple mistakes with commas.",
-  "Review status": "Find trades you have marked reviewed, or those still awaiting review.",
-  "Realized R": "Trade profit or loss expressed as a multiple of the trade's initial risk.",
-  "Planned R": "The planned reward relative to the trade's initial risk.",
-  "Minutes held": "Time between opening and closing a trade, measured in minutes.",
+  Desde:
+    "Primera fecha incluida. Los trades cerrados usan su día de cierre; los abiertos, su día de apertura.",
+  Hasta: "Última fecha incluida. Las fechas siguen la zona horaria del journal.",
+  Estrategia:
+    "Incluye los trades asignados a este playbook. «Todos» incluye también los trades sin playbook.",
+  "Símbolos (separados por comas)":
+    "Incluye estos símbolos. Separa varios con comas, por ejemplo MNQ, MES.",
+  "Excluir símbolos": "Oculta estos símbolos de los resultados. Separa varios con comas.",
+  "Etiquetas requeridas (separadas por comas)":
+    "Filtra por las etiquetas guardadas en tus trades. Separa varias con comas.",
+  "Errores requeridos": "Filtra por los errores de trading registrados. Separa varios con comas.",
+  "Estado de revisión":
+    "Busca los trades que has marcado como revisados, o los que faltan por revisar.",
+  "R realizado": "Beneficio o pérdida del trade expresado como múltiplo del riesgo inicial.",
+  "R planificado": "La recompensa planificada respecto al riesgo inicial del trade.",
+  "Minutos en el trade": "Tiempo entre la apertura y el cierre del trade, en minutos.",
 };
 export const fieldClass = "h-9 w-full min-w-0 rounded-md border bg-background px-2 text-sm";
 export function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -34,7 +36,7 @@ export function Field({ label, children }: { label: string; children: React.Reac
           <HoverHint heading={label} content={FIELD_HINTS[label.split(" · ")[0]!]}>
             <span
               tabIndex={0}
-              aria-label={`About ${label}`}
+              aria-label={`Sobre ${label}`}
               className="inline-flex cursor-help rounded-sm text-muted-foreground/70 outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <CircleHelp aria-hidden="true" className="h-3 w-3" />
@@ -90,7 +92,7 @@ export function FilterFields({
           value={value[key] ?? ""}
           onValueChange={(next) => set(key, next)}
         >
-          <option value="">All</option>
+          <option value="">Todos</option>
           {choices.map(([v, l]) => (
             <option key={v} value={v}>
               {l}
@@ -103,41 +105,45 @@ export function FilterFields({
   return (
     <div className="journal-filter-fields space-y-5">
       <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3">
-        {input("from", "From", "date")}
-        {input("to", "To", "date")}
+        {input("from", "Desde", "date")}
+        {input("to", "Hasta", "date")}
         {select(
           "playbookId",
-          "Strategy",
+          "Estrategia",
           (playbooks?.playbooks ?? []).map((p) => [p.id, p.name]),
         )}
-        {input("symbol", "Symbols (comma-separated)")}
-        {input("excludeSymbol", "Exclude symbols")}
-        {input("tag", "Required tags (comma-separated)")}
-        {input("mistake", "Required mistakes")}
-        {select("direction", "Direction", [
+        {input("symbol", "Símbolos (separados por comas)")}
+        {input("excludeSymbol", "Excluir símbolos")}
+        {input("tag", "Etiquetas requeridas (separadas por comas)")}
+        {input("mistake", "Errores requeridos")}
+        {select("direction", "Dirección", [
           ["long", "Long"],
           ["short", "Short"],
         ])}
-        {select("status", "Outcome", [
-          ["closed", "All closed"],
-          ["open", "Open"],
+        {select("status", "Resultado", [
+          ["closed", "Todos los cerrados"],
+          ["open", "Abiertos"],
           ["win", "Win"],
           ["loss", "Loss"],
           ["breakeven", "Breakeven"],
         ])}
-        {select("reviewed", "Review status", [
-          ["yes", "Reviewed"],
-          ["no", "Unreviewed"],
+        {select("reviewed", "Estado de revisión", [
+          ["yes", "Revisados"],
+          ["no", "Sin revisar"],
         ])}
-        {select(
-          "assetClass",
-          "Asset class",
-          ["equity", "futures", "forex", "option", "crypto", "cfd", "other"].map((v) => [v, v]),
-        )}
+        {select("assetClass", "Tipo de activo", [
+          ["equity", "Acciones"],
+          ["futures", "Futuros"],
+          ["forex", "Forex"],
+          ["option", "Opciones"],
+          ["crypto", "Cripto"],
+          ["cfd", "CFD"],
+          ["other", "Otros"],
+        ])}
       </div>
       <fieldset className="journal-filter-accounts rounded-lg border p-3">
         <legend className="px-1 text-xs text-muted-foreground">
-          Accounts · none selected means all
+          Cuentas · si no marcas ninguna, se incluyen todas
         </legend>
         <div className="flex flex-wrap gap-3">
           {accounts?.accounts
@@ -160,32 +166,32 @@ export function FilterFields({
       </fieldset>
       <details className="journal-filter-advanced">
         <summary className="flex cursor-pointer items-center justify-between gap-3 text-sm">
-          <span>Size, price, risk and time</span>
+          <span>Tamaño, precio, riesgo y tiempo</span>
           <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
         </summary>
         <div className="journal-filter-advanced-grid mt-3 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-4">
           {(
             [
-              ["quantity", "Total entry quantity"],
-              ["entry", "Entry price"],
-              ["exit", "Exit price"],
-              ["duration", "Minutes held"],
-              ["r", "Realized R"],
-              ["plannedR", "Planned R"],
-              ["pnl", "Net P&L"],
-              ["rating", "Rating"],
+              ["quantity", "Cantidad total de entrada"],
+              ["entry", "Precio de entrada"],
+              ["exit", "Precio de salida"],
+              ["duration", "Minutos en el trade"],
+              ["r", "R realizado"],
+              ["plannedR", "R planificado"],
+              ["pnl", "P&L neto"],
+              ["rating", "Valoración"],
             ] as const
           ).flatMap(([k, l]) => [
             input(`${k}Min` as FilterKey, `${l} · min`, "number"),
             input(`${k}Max` as FilterKey, `${l} · max`, "number"),
           ])}
-          {input("entryAfter", "Entry after", "time")}
-          {input("entryBefore", "Entry before", "time")}
-          {input("exitAfter", "Exit after", "time")}
-          {input("exitBefore", "Exit before", "time")}
+          {input("entryAfter", "Entrada después de", "time")}
+          {input("entryBefore", "Entrada antes de", "time")}
+          {input("exitAfter", "Salida después de", "time")}
+          {input("exitBefore", "Salida antes de", "time")}
         </div>
         <div className="journal-filter-weekdays mt-3 flex flex-wrap gap-2">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, i) => (
+          {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((day, i) => (
             <label key={day} className="journal-filter-choice flex items-center gap-2 text-xs">
               <Checkbox
                 checked={(value.weekdays ?? "").split(",").includes(String(i))}

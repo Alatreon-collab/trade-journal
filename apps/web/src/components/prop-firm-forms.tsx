@@ -126,7 +126,7 @@ function Form({
           </p>
         )}
         <Button type="submit" disabled={busy}>
-          {busy ? "Saving…" : "Save record"}
+          {busy ? "Guardando…" : "Guardar registro"}
         </Button>
       </form>
     </>
@@ -198,12 +198,12 @@ function AccountForm({
     <Form
       title={
         old
-          ? "Edit prop account"
+          ? "Editar cuenta prop"
           : modal.parent
-            ? "Track next attempt or phase"
-            : "Track a prop account"
+            ? "Seguir el siguiente intento o fase"
+            : "Seguir una cuenta prop"
       }
-      description="Keep each evaluation, reset attempt and funding phase as its own record. Account size is nominal capital, not money you spent."
+      description="Guarda cada evaluación, cada intento tras un reset y cada fase de fondeo como un registro aparte. El tamaño de la cuenta es capital nominal, no dinero que hayas gastado."
       busy={busy}
       error={error}
       submit={() =>
@@ -211,9 +211,9 @@ function AccountForm({
       }
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        {input("firm", "Firm name", true)}
-        {input("name", "Account / attempt name", true)}
-        <Field label="Program">
+        {input("firm", "Nombre de la firma", true)}
+        {input("name", "Nombre de la cuenta / intento", true)}
+        <Field label="Programa">
           <OptionSelect
             value={values.program}
             onValueChange={(program) => set({ ...values, program })}
@@ -225,7 +225,7 @@ function AccountForm({
             ))}
           </OptionSelect>
         </Field>
-        <Field label="Status">
+        <Field label="Estado">
           <OptionSelect
             value={values.status}
             onValueChange={(status) =>
@@ -244,32 +244,32 @@ function AccountForm({
             ))}
           </OptionSelect>
         </Field>
-        {input("currency", "Currency code", true)}
-        {input("size", "Nominal account size (optional)")}
-        <Field label="Opened on">
+        {input("currency", "Código de divisa", true)}
+        {input("size", "Tamaño nominal de la cuenta (opcional)")}
+        <Field label="Abierta el">
           <DatePicker
-            label="Prop account opening date"
+            label="Fecha de apertura de la cuenta prop"
             value={values.openedOn}
             max={data.today}
             onValueChange={(openedOn) => set({ ...values, openedOn })}
           />
         </Field>
         {values.status !== "active" && (
-          <Field label="Resolved on">
+          <Field label="Resuelta el">
             <DatePicker
-              label="Prop account closing date"
+              label="Fecha de cierre de la cuenta prop"
               value={values.closedOn}
               max={data.today}
               onValueChange={(closedOn) => set({ ...values, closedOn })}
             />
           </Field>
         )}
-        <Field label="Previous attempt / phase">
+        <Field label="Intento / fase anterior">
           <OptionSelect
             value={values.parentId}
             onValueChange={(parentId) => set({ ...values, parentId })}
           >
-            <option value="">None</option>
+            <option value="">Ninguno</option>
             {data.accounts
               .filter(
                 (a) =>
@@ -284,12 +284,12 @@ function AccountForm({
               ))}
           </OptionSelect>
         </Field>
-        <Field label="Link journal account (optional)">
+        <Field label="Vincular cuenta del journal (opcional)">
           <OptionSelect
             value={values.journalAccountId}
             onValueChange={(journalAccountId) => set({ ...values, journalAccountId })}
           >
-            <option value="">No journal link</option>
+            <option value="">Sin vincular</option>
             {journal?.accounts.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name}
@@ -299,37 +299,37 @@ function AccountForm({
         </Field>
       </div>
       <details>
-        <summary className="cursor-pointer text-sm">Renewal reminder</summary>
+        <summary className="cursor-pointer text-sm">Recordatorio de renovación</summary>
         <p className="my-2 text-xs text-muted-foreground">
-          A reminder only. Record an expense when charged; nothing is charged or added
-          automatically.
+          Es solo un recordatorio. Registra el gasto cuando te lo cobren; no se cobra ni se añade
+          nada automáticamente.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Next renewal">
+          <Field label="Próxima renovación">
             <DatePicker
-              label="Next renewal date"
+              label="Fecha de la próxima renovación"
               value={values.renewalOn}
               onValueChange={(renewalOn) => set({ ...values, renewalOn })}
             />
           </Field>
-          {input("renewalAmount", "Expected renewal amount")}
+          {input("renewalAmount", "Importe previsto de la renovación")}
         </div>
         <Button
           type="button"
           variant="ghost"
           onClick={() => set({ ...values, renewalOn: "", renewalAmount: "" })}
         >
-          Clear reminder
+          Quitar recordatorio
         </Button>
       </details>
-      <Field label="Notes / rules / breach reason">
+      <Field label="Notas / reglas / motivo de la quema">
         <textarea
           className={`${fieldClass} h-24 py-2`}
           value={values.notes}
           onChange={(e) => set({ ...values, notes: e.target.value })}
         />
       </Field>
-      {old && input("reason", "Reason for change", true)}
+      {old && input("reason", "Motivo del cambio", true)}
     </Form>
   );
 }
@@ -384,17 +384,17 @@ function EntryForm({
     <Form
       title={
         old
-          ? `Edit ${kind}`
+          ? `Editar ${label(kind).toLowerCase()}`
           : payout
-            ? "Log a payout request"
+            ? "Registrar una solicitud de payout"
             : refund
-              ? "Record an expense refund"
-              : "Record prop spending"
+              ? "Registrar un reembolso de gasto"
+              : "Registrar un gasto de prop firm"
       }
       description={
         payout
-          ? "A request is not income. Record actual bank receipts separately, including partial payments. This does not request a payout from your firm."
-          : "Record cash that actually changed hands. Include taxes and fees in the amount paid. Do not duplicate trading commissions already included elsewhere."
+          ? "Una solicitud no es un ingreso. Registra aparte lo que llegue de verdad al banco, incluidos los pagos parciales. Esto no pide ningún payout a tu firma."
+          : "Registra el dinero que realmente se ha movido. Incluye impuestos y comisiones en el importe pagado. No dupliques comisiones de trading que ya estén en otro sitio."
       }
       busy={busy}
       error={error}
@@ -403,7 +403,7 @@ function EntryForm({
       }
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Prop account">
+        <Field label="Cuenta prop">
           <OptionSelect
             disabled={Boolean(old || refund)}
             value={values.accountId}
@@ -412,21 +412,23 @@ function EntryForm({
               set({ ...values, accountId, firm: a?.firm ?? "", currency: a?.currency ?? "" });
             }}
           >
-            <option value="">{payout ? "Choose a funded account" : "Shared firm expense"}</option>
+            <option value="">
+              {payout ? "Elige una cuenta fondeada" : "Gasto común de la firma"}
+            </option>
             {data.accounts
               .filter((a) => !payout || ["funded", "instant_funded", "live"].includes(a.program))
               .map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.firm} · {a.name}
-                  {a.archived ? " (archived)" : ""}
+                  {a.archived ? " (archivada)" : ""}
                 </option>
               ))}
           </OptionSelect>
         </Field>
-        {input("firm", "Firm", true, Boolean(values.accountId || old || refund))}
-        {input("currency", "Currency", true, Boolean(values.accountId || old || refund))}
+        {input("firm", "Firma", true, Boolean(values.accountId || old || refund))}
+        {input("currency", "Divisa", true, Boolean(values.accountId || old || refund))}
         {!payout && !refund && (
-          <Field label="Expense category">
+          <Field label="Categoría del gasto">
             <OptionSelect
               value={values.category}
               onValueChange={(category) => set({ ...values, category })}
@@ -439,20 +441,24 @@ function EntryForm({
             </OptionSelect>
           </Field>
         )}
-        {input("amount", payout ? "Gross requested amount (before split)" : "Actual amount", true)}
+        {input(
+          "amount",
+          payout ? "Importe bruto solicitado (antes del reparto)" : "Importe real",
+          true,
+        )}
         {payout && (
           <>
-            {input("splitPercent", "Your share (%)", true)}
-            {input("fee", "Fees withheld from your share", true)}
+            {input("splitPercent", "Tu parte (%)", true)}
+            {input("fee", "Comisiones retenidas de tu parte", true)}
             <p className="col-span-full text-xs text-muted-foreground">
-              If your amount is already after the firm split, enter 100% and only fees still to be
-              deducted. Never deduct the split twice.
+              Si tu importe ya es después del reparto con la firma, pon 100% y solo las comisiones
+              que falten por descontar. No descuentes nunca el reparto dos veces.
             </p>
           </>
         )}
-        <Field label={payout ? "Request date" : "Cash date"}>
+        <Field label={payout ? "Fecha de solicitud" : "Fecha del pago"}>
           <DatePicker
-            label={payout ? "Payout request date" : "Transaction date"}
+            label={payout ? "Fecha de solicitud del payout" : "Fecha de la transacción"}
             value={values.occurredOn}
             max={data.today}
             onValueChange={(occurredOn) => set({ ...values, occurredOn })}
@@ -460,14 +466,14 @@ function EntryForm({
         </Field>
         {payout && (
           <>
-            <Field label="Expected payment date (optional)">
+            <Field label="Fecha de pago prevista (opcional)">
               <DatePicker
-                label="Expected payout date"
+                label="Fecha prevista del payout"
                 value={values.dueOn}
                 onValueChange={(dueOn) => set({ ...values, dueOn })}
               />
             </Field>
-            <Field label="Payout status">
+            <Field label="Estado del payout">
               <OptionSelect
                 value={values.status}
                 onValueChange={(status) =>
@@ -483,9 +489,9 @@ function EntryForm({
             </Field>
           </>
         )}
-        {input("reference", "Invoice / payment reference")}
+        {input("reference", "Factura / referencia del pago")}
       </div>
-      <Field label="Notes">
+      <Field label="Notas">
         <textarea
           className={`${fieldClass} h-20 py-2`}
           value={values.notes}
@@ -494,11 +500,11 @@ function EntryForm({
       </Field>
       {refund && (
         <p className="text-xs text-muted-foreground">
-          Linked expense: {values.parentId}. Refunds reduce costs and are shown separately from
-          payout income.
+          Gasto vinculado: {values.parentId}. Los reembolsos reducen el coste y se muestran aparte
+          de los ingresos por payout.
         </p>
       )}
-      {old && input("reason", "Reason for change", true)}
+      {old && input("reason", "Motivo del cambio", true)}
     </Form>
   );
 }
@@ -520,8 +526,8 @@ function ReceiptForm({
   const { busy, error, save } = useSave(close, refresh);
   return (
     <Form
-      title="Record payout cash movement"
-      description={`Record the actual net amount credited or returned in ${payout.currency}. If your bank converted currencies, use the statement's original-currency amount; this tracker does not invent an exchange rate.`}
+      title="Registrar movimiento de caja del payout"
+      description={`Registra el importe neto real abonado o devuelto en ${payout.currency}. Si tu banco cambió de divisa, usa el importe en la divisa original del extracto; aquí no se inventa ningún tipo de cambio.`}
       busy={busy}
       error={error}
       submit={() =>
@@ -535,35 +541,35 @@ function ReceiptForm({
       }
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Movement">
+        <Field label="Movimiento">
           <OptionSelect value={values.kind} onValueChange={(kind) => set({ ...values, kind })}>
-            <option value="receipt">Money received</option>
-            <option value="reversal">Money returned / reversed</option>
+            <option value="receipt">Dinero recibido</option>
+            <option value="reversal">Dinero devuelto / revertido</option>
           </OptionSelect>
         </Field>
-        <Field label={`Actual amount (${payout.currency})`}>
+        <Field label={`Importe real (${payout.currency})`}>
           <Input
             required
             value={values.amount}
             onChange={(e) => set({ ...values, amount: e.target.value })}
           />
         </Field>
-        <Field label="Settlement date">
+        <Field label="Fecha de liquidación">
           <DatePicker
-            label="Settlement date"
+            label="Fecha de liquidación"
             value={values.occurredOn}
             max={data.today}
             onValueChange={(occurredOn) => set({ ...values, occurredOn })}
           />
         </Field>
-        <Field label="Bank reference">
+        <Field label="Referencia bancaria">
           <Input
             value={values.reference}
             onChange={(e) => set({ ...values, reference: e.target.value })}
           />
         </Field>
       </div>
-      <Field label="Notes">
+      <Field label="Notas">
         <textarea
           className={`${fieldClass} h-20 py-2`}
           value={values.notes}
@@ -571,8 +577,8 @@ function ReceiptForm({
         />
       </Field>
       <p className="text-xs text-muted-foreground">
-        Keep the request open for partial payments. Once the final payment arrives, edit the payout
-        status to Completed; a difference from the expected amount remains visible.
+        Deja la solicitud abierta si hay pagos parciales. Cuando llegue el último pago, cambia el
+        estado del payout a Completado; la diferencia con el importe esperado seguirá visible.
       </p>
     </Form>
   );
@@ -589,8 +595,8 @@ function ChangeForm({
       title={modal.name}
       description={
         modal.action === "account.archive"
-          ? "Archiving hides the account from the active list. Its cash history remains in returns. You can restore it later."
-          : "Voided records stay in the audit trail and are excluded from cash totals. They can be restored. Voiding a payout also excludes its receipts."
+          ? "Al archivarla, la cuenta desaparece de la lista de activas. Su historial de caja sigue contando en el retorno. Puedes restaurarla más adelante."
+          : "Los registros anulados siguen en el historial y no cuentan en los totales de caja. Se pueden restaurar. Anular un payout también excluye sus cobros."
       }
       busy={busy}
       error={error}
@@ -605,7 +611,7 @@ function ChangeForm({
         })
       }
     >
-      <Field label="Reason">
+      <Field label="Motivo">
         <Input required value={reason} onChange={(e) => setReason(e.target.value)} />
       </Field>
     </Form>
@@ -620,22 +626,24 @@ function Detail({ modal, data }: Props & { modal: Extract<PropModal, { kind: "de
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{account?.name ?? `${label(entry?.kind ?? "Entry")} details`}</DialogTitle>
+        <DialogTitle>
+          {account?.name ?? `Detalles: ${label(entry?.kind ?? "registro")}`}
+        </DialogTitle>
         <DialogDescription>
           {account?.firm ?? entry?.firm} · {modal.id}
         </DialogDescription>
       </DialogHeader>
       <p className="whitespace-pre-wrap text-sm">
-        {account?.notes || entry?.notes || "No notes added."}
+        {account?.notes || entry?.notes || "Sin notas."}
       </p>
       {account && (
         <>
           <p className="break-all text-xs text-muted-foreground">
-            Account ID for CSV imports: {account.id}
+            ID de cuenta para importar CSV: {account.id}
           </p>
           {account.parentId && (
             <p className="text-sm">
-              Previous attempt / phase:{" "}
+              Intento / fase anterior:{" "}
               {data.accounts.find((a) => a.id === account.parentId)?.name ?? account.parentId}
             </p>
           )}
@@ -644,28 +652,28 @@ function Detail({ modal, data }: Props & { modal: Extract<PropModal, { kind: "de
               className="text-sm underline"
               href={`/trades?accounts=${encodeURIComponent(account.journalAccountId)}`}
             >
-              Open linked journal trades
+              Abrir los trades vinculados del journal
             </a>
           )}
         </>
       )}
       <Attachments type={modal.type === "account" ? "prop-account" : "prop-entry"} id={modal.id} />
       <details>
-        <summary className="cursor-pointer text-sm">Edit history · latest 100 changes</summary>
+        <summary className="cursor-pointer text-sm">Historial de cambios · últimos 100</summary>
         <div className="mt-3 space-y-3">
           {history?.history.map((item) => (
             <details key={item.id} className="rounded-md border p-2 text-xs">
               <summary className="cursor-pointer">
                 {item.createdAt} ·{" "}
-                {item.reason.startsWith("CSV import") ? "CSV import" : item.reason}
+                {item.reason.startsWith("CSV import") ? "Importación CSV" : item.reason}
               </summary>
-              <p className="my-2 font-medium">Before</p>
+              <p className="my-2 font-medium">Antes</p>
               <pre className="whitespace-pre-wrap break-all">
                 {item.beforeJson
                   ? JSON.stringify(JSON.parse(item.beforeJson), null, 2)
-                  : "New record"}
+                  : "Registro nuevo"}
               </pre>
-              <p className="my-2 font-medium">After</p>
+              <p className="my-2 font-medium">Después</p>
               <pre className="whitespace-pre-wrap break-all">
                 {JSON.stringify(JSON.parse(item.afterJson), null, 2)}
               </pre>
@@ -704,24 +712,25 @@ function ImportForm({ close, refresh }: Props) {
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Import prop cash CSV</DialogTitle>
+        <DialogTitle>Importar CSV de caja de prop firms</DialogTitle>
         <DialogDescription>
-          Import settled expenses, refunds and net payouts. Preview validates every row; an import
-          is all-or-nothing and repeated stable IDs are skipped.
+          Importa gastos liquidados, reembolsos y payouts netos. La vista previa valida cada fila;
+          la importación es todo o nada y los ID repetidos se omiten.
         </DialogDescription>
       </DialogHeader>
       <a className="text-sm underline" href="/prop-cash-template.csv" download>
-        Download generic cash header template
+        Descargar plantilla CSV con las cabeceras
       </a>
       <p className="text-xs text-muted-foreground">
-        Use kind expense, refund or payout; date YYYY-MM-DD; positive amount in currency units. A
-        payout amount is cash already received after splits and fees. Payouts need account_id from
-        an account’s Details. A refund’s expense_id references its original CSV row ID. Put expenses
-        before their refunds. This is not a broker statement importer.
+        Usa en kind: expense, refund o payout; fecha AAAA-MM-DD; importe positivo en unidades de la
+        divisa. El importe de un payout es dinero ya recibido tras repartos y comisiones. Los
+        payouts necesitan el account_id que aparece en Detalles de la cuenta. El expense_id de un
+        reembolso apunta al ID de su fila original. Pon los gastos antes que sus reembolsos. No
+        sirve para importar extractos del bróker.
       </p>
       <Input
         type="file"
-        aria-label="Prop cash CSV file"
+        aria-label="Archivo CSV de caja de prop firms"
         accept=".csv,text/csv"
         disabled={busy}
         onChange={async (e) => {
@@ -731,18 +740,18 @@ function ImportForm({ close, refresh }: Props) {
           setError("");
           if (!file) return;
           if (file.size > 2 * 1024 * 1024) {
-            setError("Use a CSV up to 2 MB / 1,000 rows.");
+            setError("Usa un CSV de hasta 2 MB / 1.000 filas.");
             return;
           }
           try {
             setContent(decodeImportFile(await file.arrayBuffer()));
           } catch {
-            setError("Could not read CSV.");
+            setError("No se pudo leer el CSV.");
           }
         }}
       />
       <Button variant="outline" disabled={!content || busy} onClick={() => void act("preview")}>
-        {busy ? "Validating…" : "Validate & preview"}
+        {busy ? "Validando…" : "Validar y previsualizar"}
       </Button>
       {error && (
         <p role="alert" className="text-sm text-destructive">
@@ -752,7 +761,7 @@ function ImportForm({ close, refresh }: Props) {
       {result && (
         <>
           <p className="text-sm">
-            {result.imported} new records · {result.skipped} already imported.
+            {result.imported} registros nuevos · {result.skipped} ya importados.
           </p>
           <div className="space-y-2">
             {result.sample.map((row) => (
@@ -762,7 +771,7 @@ function ImportForm({ close, refresh }: Props) {
             ))}
           </div>
           <Button disabled={busy || result.imported === 0} onClick={() => void act("import")}>
-            Import {result.imported} records
+            Importar {result.imported} registros
           </Button>
         </>
       )}

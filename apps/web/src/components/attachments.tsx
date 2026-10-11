@@ -28,13 +28,13 @@ export function Attachments({
           onClick={() => input.current?.click()}
         >
           <Paperclip />
-          {busy ? "Uploading…" : "Add attachment"}
+          {busy ? "Subiendo…" : "Añadir adjunto"}
         </Button>
-        <span className="text-xs text-muted-foreground">Images or PDF · up to 8 MB each</span>
+        <span className="text-xs text-muted-foreground">Imágenes o PDF · hasta 8 MB cada uno</span>
       </div>
       <input
         ref={input}
-        aria-label="Upload attachment"
+        aria-label="Subir adjunto"
         type="file"
         accept="image/png,image/jpeg,image/webp,application/pdf"
         className="hidden"
@@ -54,7 +54,7 @@ export function Attachments({
               if (!r.ok) throw new Error(result.error);
             }
           } catch (err) {
-            setFailure(err instanceof Error ? err.message : "Upload failed.");
+            setFailure(err instanceof Error ? err.message : "Falló la subida.");
           } finally {
             setBusy(false);
             if (input.current) input.current.value = "";

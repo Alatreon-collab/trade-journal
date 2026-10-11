@@ -48,15 +48,15 @@ export function AiImportOptions({
           htmlFor="ai-import-enabled"
           className="flex cursor-pointer items-center gap-1.5 text-xs font-normal text-muted-foreground"
         >
-          Parse with AI
+          Leer con IA
         </Label>
-        <HelpHint heading="AI statement parsing">{AI_IMPORT_HELP}</HelpHint>
+        <HelpHint heading="Lectura de extractos con IA">{AI_IMPORT_HELP}</HelpHint>
         {enabled && (
           <Popover.Trigger asChild>
             <button
               type="button"
               disabled={disabled}
-              aria-label="AI parsing settings"
+              aria-label="Ajustes de lectura con IA"
               className="flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <Settings2 className="size-3.5" />
@@ -69,13 +69,13 @@ export function AiImportOptions({
           align="end"
           sideOffset={8}
           collisionPadding={12}
-          aria-label="AI parsing settings"
+          aria-label="Ajustes de lectura con IA"
           className="z-50 w-[360px] max-w-[calc(100vw-24px)] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto rounded-xl border bg-popover p-4 text-popover-foreground shadow-xl"
         >
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-medium">AI parsing settings</span>
+            <span className="text-sm font-medium">Ajustes de lectura con IA</span>
             <Popover.Close
-              aria-label="Close AI parsing settings"
+              aria-label="Cerrar ajustes de lectura con IA"
               className="rounded-md p-1 text-muted-foreground hover:bg-accent"
             >
               <X className="size-4" />
@@ -84,7 +84,7 @@ export function AiImportOptions({
           <div className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1">
-                <Label htmlFor="import-ai-provider">AI provider</Label>
+                <Label htmlFor="import-ai-provider">Proveedor de IA</Label>
                 <OptionSelect
                   id="import-ai-provider"
                   value={value.provider}
@@ -103,7 +103,7 @@ export function AiImportOptions({
                 </OptionSelect>
               </div>
               <div className="space-y-1">
-                <Label htmlFor="import-ai-model">Model ID</Label>
+                <Label htmlFor="import-ai-model">ID del modelo</Label>
                 <Input
                   id="import-ai-model"
                   value={value.model}
@@ -125,27 +125,28 @@ export function AiImportOptions({
                 onChange={(e) => onChange({ ...value, apiKey: e.target.value })}
                 placeholder={
                   connection?.configured
-                    ? "Leave blank to use your configured key"
-                    : "Enter your API key"
+                    ? "Déjalo vacío para usar la clave configurada"
+                    : "Introduce tu API key"
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Keys entered here are used for this upload session only. Manage saved keys in{" "}
+                Las claves que pongas aquí solo se usan en esta subida. Gestiona las claves
+                guardadas en{" "}
                 <a href="/settings#ai-settings" className="underline">
-                  Settings
+                  Ajustes
                 </a>
                 .
               </p>
             </div>
             <p className="text-xs text-muted-foreground">
-              Your file will be sent to {AI_PROVIDER_NAMES[value.provider]} when you select{" "}
-              <strong>Preview with AI</strong>. Provider charges apply. Review the extracted trades
-              before importing.
+              El archivo se enviará a {AI_PROVIDER_NAMES[value.provider]} cuando pulses{" "}
+              <strong>Vista previa con IA</strong>. El proveedor cobra el uso. Revisa los trades
+              extraídos antes de importar.
             </p>
             <p className="text-xs text-muted-foreground">
-              CSV, TSV, HTML, XML, TXT and PDF · Up to 200 executions per preview. PDFs up to 8 MB;
-              text exports up to 150,000 characters. For spreadsheets, export as CSV first. PDF
-              support depends on your selected model.
+              CSV, TSV, HTML, XML, TXT y PDF · Hasta 200 ejecuciones por vista previa. PDF de hasta
+              8 MB; exportaciones de texto de hasta 150.000 caracteres. Las hojas de cálculo,
+              exportadas antes a CSV. El soporte de PDF depende del modelo elegido.
             </p>
           </div>
         </Popover.Content>

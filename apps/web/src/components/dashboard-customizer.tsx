@@ -45,22 +45,22 @@ interface DashboardCustomizerProps {
 
 // Decorative only: a new card remains available even without a dedicated icon.
 const cardIcons: Record<string, LucideIcon> = {
-  "Net P&L": Wallet,
-  "Trade win %": Percent,
+  "P&L neto": Wallet,
+  "% trades ganadores": Percent,
   "Profit factor": Scale,
-  "Day win %": CalendarCheck,
-  "Avg win / loss": ArrowUpDown,
+  "% días ganadores": CalendarCheck,
+  "Ganancia / pérdida media": ArrowUpDown,
   "Edge Score": Gauge,
-  "Cumulative P&L": ChartLine,
-  "Daily P&L": ChartColumn,
-  Calendar: CalendarDays,
-  Activity,
-  "Max drawdown": TrendingDown,
-  Streaks: Flame,
-  "Expectancy / trade": Target,
-  "Avg duration": Timer,
-  "Best / worst day": CalendarCheck,
-  "Trade time performance": Clock3,
+  "P&L acumulado": ChartLine,
+  "P&L diario": ChartColumn,
+  Calendario: CalendarDays,
+  Actividad: Activity,
+  "Drawdown máximo": TrendingDown,
+  Rachas: Flame,
+  "Esperanza / trade": Target,
+  "Duración media": Timer,
+  "Mejor / peor día": CalendarCheck,
+  "Rendimiento por hora": Clock3,
 };
 
 export function DashboardCustomizer(props: DashboardCustomizerProps) {
@@ -69,7 +69,7 @@ export function DashboardCustomizer(props: DashboardCustomizerProps) {
       <Popover.Trigger asChild>
         <Button type="button" variant="outline" size="sm" className="dashboard-customize-trigger">
           <Settings2 />
-          Customize
+          Personalizar
           <ChevronDown className="dashboard-customize-chevron" />
         </Button>
       </Popover.Trigger>
@@ -145,15 +145,15 @@ const CustomizerPanel = forwardRef<HTMLDivElement, DashboardCustomizerProps>(
         }}
       >
         <div className="dashboard-customize-heading">
-          <h2 id={titleId}>Dashboard cards</h2>
+          <h2 id={titleId}>Tarjetas del dashboard</h2>
           <span className="dashboard-customize-count">
-            {widgets.length - hidden.length} visible
+            {widgets.length - hidden.length} visibles
           </span>
           <Popover.Close asChild>
             <button
               type="button"
               className="dashboard-customize-icon-button"
-              aria-label="Close customization"
+              aria-label="Cerrar personalización"
             >
               <X size={14} />
             </button>
@@ -164,8 +164,8 @@ const CustomizerPanel = forwardRef<HTMLDivElement, DashboardCustomizerProps>(
           <input
             ref={searchRef}
             type="text"
-            aria-label="Find dashboard cards"
-            placeholder="Find a card…"
+            aria-label="Buscar tarjetas del dashboard"
+            placeholder="Buscar una tarjeta…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => {
@@ -179,7 +179,7 @@ const CustomizerPanel = forwardRef<HTMLDivElement, DashboardCustomizerProps>(
             <button
               type="button"
               className="dashboard-customize-icon-button"
-              aria-label="Clear card search"
+              aria-label="Borrar búsqueda"
               onClick={() => {
                 setQuery("");
                 searchRef.current?.focus();
@@ -240,7 +240,7 @@ const CustomizerPanel = forwardRef<HTMLDivElement, DashboardCustomizerProps>(
                   type="button"
                   role="switch"
                   aria-checked={visible}
-                  aria-label={`Show ${widget.label}`}
+                  aria-label={`Mostrar ${widget.label}`}
                   data-card-toggle
                   className="dashboard-customize-option"
                   style={{ "--option-index": Math.min(index, 7) } as CSSProperties}
@@ -261,26 +261,26 @@ const CustomizerPanel = forwardRef<HTMLDivElement, DashboardCustomizerProps>(
             {matches.length === 0 && (
               <div className="dashboard-customize-empty">
                 <SearchX size={22} aria-hidden="true" />
-                <p>No matching cards</p>
+                <p>Ninguna tarjeta coincide</p>
                 <button type="button" onClick={() => setQuery("")}>
-                  Clear search
+                  Borrar búsqueda
                 </button>
               </div>
             )}
           </div>
         </div>
         <div className="dashboard-customize-footer">
-          <button type="button" onClick={onRestore} aria-label="Restore default layout">
+          <button type="button" onClick={onRestore} aria-label="Restaurar diseño por defecto">
             <RotateCcw size={13} aria-hidden="true" />
-            Reset layout
+            Restaurar diseño
           </button>
           <button type="button" onClick={onShowAll} disabled={hidden.length === 0}>
-            Show all cards
+            Mostrar todas
           </button>
         </div>
         <span role="status" className="sr-only">
-          {matches.length} {matches.length === 1 ? "card" : "cards"} found.{" "}
-          {widgets.length - hidden.length} of {widgets.length} visible.
+          {matches.length} {matches.length === 1 ? "tarjeta encontrada" : "tarjetas encontradas"}.{" "}
+          {widgets.length - hidden.length} de {widgets.length} visibles.
         </span>
       </Popover.Content>
     );

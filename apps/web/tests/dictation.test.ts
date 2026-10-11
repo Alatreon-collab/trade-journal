@@ -39,9 +39,9 @@ describe("dictation sessions", () => {
   });
   it("reports blocked permission, network failure and missing audio instead of failing silently", () => {
     for (const [code, text] of [
-      ["not-allowed", "blocked"],
-      ["network", "service"],
-      ["audio-capture", "microphone"],
+      ["not-allowed", "bloqueado"],
+      ["network", "servicio"],
+      ["audio-capture", "micrófono"],
     ]) {
       const { recognizer, callbacks, session } = setup();
       session.start();

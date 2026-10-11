@@ -54,10 +54,12 @@ export function AiSettings() {
         "PATCH",
       );
       setApiKey("");
-      setSaved(remove ? `${name} key removed.` : `${name} settings saved.`);
+      setSaved(remove ? `Clave de ${name} eliminada.` : `Ajustes de ${name} guardados.`);
       refresh();
     } catch (cause) {
-      setFailure(cause instanceof Error ? cause.message : "Couldn’t save AI settings.");
+      setFailure(
+        cause instanceof Error ? cause.message : "No se pudieron guardar los ajustes de IA.",
+      );
     } finally {
       setBusy(false);
     }
@@ -66,22 +68,23 @@ export function AiSettings() {
   return (
     <Card id="ai-settings" className="scroll-mt-24">
       <CardHeader>
-        <CardTitle>AI (bring your own key)</CardTitle>
+        <CardTitle>IA (con tu propia clave)</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          Use Anthropic or OpenAI for recaps, trade critiques, and “ask your journal”. Your key is
-          encrypted at rest. AI requests go from your server directly to the provider you select.
+          Usa Anthropic u OpenAI para los resúmenes, la crítica de trades y «Pregunta a tu journal».
+          Tu clave se guarda cifrada. Las peticiones van directamente desde tu ordenador al
+          proveedor que elijas.
         </p>
         {data && (
           <p className="text-xs text-muted-foreground">
-            Active provider: {AI_PROVIDER_NAMES[data.aiProvider]} ·{" "}
-            {data.aiConfigured ? "Key configured" : "Not configured"}
+            Proveedor activo: {AI_PROVIDER_NAMES[data.aiProvider]} ·{" "}
+            {data.aiConfigured ? "Clave configurada" : "Sin configurar"}
           </p>
         )}
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
-            <Label htmlFor="ai-provider">Provider</Label>
+            <Label htmlFor="ai-provider">Proveedor</Label>
             <OptionSelect
               id="ai-provider"
               value={provider}
@@ -103,7 +106,7 @@ export function AiSettings() {
             </OptionSelect>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="ai-model">Model ID</Label>
+            <Label htmlFor="ai-model">ID del modelo</Label>
             <Input
               id="ai-model"
               value={model}
@@ -117,8 +120,8 @@ export function AiSettings() {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Use a text model available to your provider account. Each provider keeps its own model and
-          key.
+          Usa un modelo de texto disponible en tu cuenta del proveedor. Cada proveedor guarda su
+          propio modelo y su clave.
         </p>
         <div className="space-y-1">
           <Label htmlFor="ai-api-key">{name} API key</Label>
@@ -133,7 +136,7 @@ export function AiSettings() {
             }}
             placeholder={
               connection?.configured
-                ? "Key configured"
+                ? "Clave configurada"
                 : provider === "anthropic"
                   ? "sk-ant-…"
                   : "sk-…"
@@ -143,10 +146,10 @@ export function AiSettings() {
           />
           <p className="text-xs text-muted-foreground">
             {environment
-              ? `Using ${provider === "openai" ? "OPENAI_API_KEY" : "ANTHROPIC_API_KEY"} from the server environment. Change or remove that variable on the server to update the key.`
+              ? `Usando ${provider === "openai" ? "OPENAI_API_KEY" : "ANTHROPIC_API_KEY"} del entorno del servidor. Cambia o elimina esa variable en el servidor para actualizar la clave.`
               : connection?.configured
-                ? "Leave blank to keep your saved key, or enter a replacement."
-                : "Add your API key, then save to use this provider."}
+                ? "Déjalo vacío para mantener la clave guardada, o escribe una nueva."
+                : "Añade tu API key y guarda para usar este proveedor."}
           </p>
         </div>
         {(error || failure) && (
@@ -164,11 +167,11 @@ export function AiSettings() {
             disabled={disabled || !model.trim() || (!apiKey.trim() && !connection?.configured)}
             onClick={() => save()}
           >
-            {busy ? "Saving…" : "Save AI settings"}
+            {busy ? "Guardando…" : "Guardar ajustes de IA"}
           </Button>
           {connection?.source === "saved" && (
             <Button variant="outline" disabled={disabled} onClick={() => save(true)}>
-              Remove {name} key
+              Eliminar clave de {name}
             </Button>
           )}
         </div>

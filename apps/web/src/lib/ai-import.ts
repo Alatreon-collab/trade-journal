@@ -4,7 +4,7 @@ export const AI_IMPORT_MAX_BYTES = 8 * 1024 * 1024;
 export const AI_IMPORT_MAX_TEXT = 150_000;
 export const AI_IMPORT_MAX_EXECUTIONS = 200;
 export const AI_IMPORT_HELP =
-  "If you're having issues importing a file, AI parsing can help. The journal supports many broker exports, but column names and statement layouts can change. OpenAI or Anthropic can interpret unfamiliar formats and extract trades for your review. Check quantities, prices, fees and dates against your statement before importing. Your file is sent to your chosen provider using your API key; provider usage charges apply.";
+  "Si tienes problemas para importar un archivo, la IA puede ayudarte. El journal admite muchas exportaciones de brókers, pero los nombres de columnas y el formato de los extractos pueden cambiar. OpenAI o Anthropic pueden interpretar formatos desconocidos y extraer los trades para que los revises. Comprueba cantidades, precios, comisiones y fechas con tu extracto antes de importar. El archivo se envía al proveedor que elijas con tu API key; el proveedor te cobrará el uso.";
 
 export interface AiImportOptions {
   provider: AiProvider;

@@ -23,13 +23,13 @@ export function JournalDefaultSettings() {
   }, [data]);
   const matchFields = (r: FeeRule | RiskRule, update: (r: FeeRule | RiskRule) => void) => (
     <>
-      <Field label="Account">
+      <Field label="Cuenta">
         <OptionSelect
           className={fieldClass}
           value={r.accountId}
           onValueChange={(next) => update({ ...r, accountId: next })}
         >
-          <option value="">All accounts</option>
+          <option value="">Todas las cuentas</option>
           {accounts?.accounts.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name}
@@ -37,11 +37,11 @@ export function JournalDefaultSettings() {
           ))}
         </OptionSelect>
       </Field>
-      <Field label="Symbol (blank = all)">
+      <Field label="Símbolo (vacío = todos)">
         <input
           className={fieldClass}
           value={r.symbol}
-          placeholder="e.g. ES"
+          placeholder="p. ej. MNQ"
           onChange={(e) => update({ ...r, symbol: e.target.value.toUpperCase() })}
         />
       </Field>
@@ -50,7 +50,7 @@ export function JournalDefaultSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Breakeven, fees and risk defaults</CardTitle>
+        <CardTitle>Breakeven, comisiones y riesgo por defecto</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
         {error && (
@@ -59,7 +59,7 @@ export function JournalDefaultSettings() {
           </p>
         )}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label="Breakeven range (±)">
+          <Field label="Rango de breakeven (±)">
             <MonetaryField sensitive={draft.breakevenMode === "money"}>
               <input
                 type="number"
@@ -71,7 +71,7 @@ export function JournalDefaultSettings() {
               />
             </MonetaryField>
           </Field>
-          <Field label="Range unit">
+          <Field label="Unidad del rango">
             <OptionSelect
               className={fieldClass}
               value={draft.breakevenMode}
@@ -79,21 +79,22 @@ export function JournalDefaultSettings() {
                 setDraft({ ...draft, breakevenMode: next as "money" | "percent" })
               }
             >
-              <option value="money">Account currency</option>
-              <option value="percent">% of entry notional</option>
+              <option value="money">Divisa de la cuenta</option>
+              <option value="percent">% del nocional de entrada</option>
             </OptionSelect>
           </Field>
         </div>
         <p className="text-xs text-muted-foreground">
-          Closed trades within this net P&L range count as breakeven. Actual P&L is unchanged.
-          Percentage mode uses entry price × total entry quantity × contract multiplier; configure
-          multipliers for derivatives first.
+          Los trades cerrados con un P&L neto dentro de este rango cuentan como breakeven. El P&L
+          real no cambia. El modo porcentaje usa precio de entrada × cantidad total de entrada ×
+          multiplicador del contrato; configura antes los multiplicadores de los derivados.
         </p>
         <div className="space-y-3">
-          <h3 className="text-sm font-medium">Default fees</h3>
+          <h3 className="text-sm font-medium">Comisiones por defecto</h3>
           <p className="text-xs text-muted-foreground">
-            Applied to new fills with a zero fee, including explicit zeroes. Nonzero imported fees
-            and existing fills are kept. The first matching rule wins.
+            Se aplican a las ejecuciones nuevas con comisión cero, incluidos los ceros explícitos.
+            Se mantienen las comisiones importadas distintas de cero y las ejecuciones ya
+            existentes. Se aplica la primera regla que coincida.
           </p>
           {draft.feeRules.map((r, i) => {
             const update = (next: FeeRule | RiskRule) =>
@@ -105,7 +106,7 @@ export function JournalDefaultSettings() {
               <div key={r.id} className="space-y-2 rounded-md border p-3">
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {matchFields(r, update)}
-                  <Field label="Fee amount">
+                  <Field label="Importe de la comisión">
                     <MonetaryField>
                       <input
                         type="number"
@@ -117,14 +118,14 @@ export function JournalDefaultSettings() {
                       />
                     </MonetaryField>
                   </Field>
-                  <Field label="Charge per">
+                  <Field label="Cobrar por">
                     <OptionSelect
                       className={fieldClass}
                       value={r.mode}
                       onValueChange={(next) => update({ ...r, mode: next as FeeRule["mode"] })}
                     >
-                      <option value="execution">Execution</option>
-                      <option value="unit">Unit / contract</option>
+                      <option value="execution">Ejecución</option>
+                      <option value="unit">Unidad / contrato</option>
                     </OptionSelect>
                   </Field>
                 </div>
@@ -135,7 +136,7 @@ export function JournalDefaultSettings() {
                     setDraft({ ...draft, feeRules: draft.feeRules.filter((x) => x.id !== r.id) })
                   }
                 >
-                  Remove fee rule
+                  Quitar regla de comisión
                 </Button>
               </div>
             );
@@ -159,14 +160,14 @@ export function JournalDefaultSettings() {
               })
             }
           >
-            Add fee rule
+            Añadir regla de comisión
           </Button>
         </div>
         <div className="space-y-3">
-          <h3 className="text-sm font-medium">Stop and target defaults</h3>
+          <h3 className="text-sm font-medium">Stop y objetivo por defecto</h3>
           <p className="text-xs text-muted-foreground">
-            Distances from weighted entry, adjusted for long or short direction. Applied only when a
-            new trade is first created. The first matching rule wins.
+            Distancias desde la entrada media ponderada, ajustadas según sea long o short. Solo se
+            aplican cuando se crea un trade nuevo. Se aplica la primera regla que coincida.
           </p>
           {draft.riskRules.map((r, i) => {
             const update = (next: FeeRule | RiskRule) =>
@@ -178,7 +179,7 @@ export function JournalDefaultSettings() {
               <div key={r.id} className="space-y-2 rounded-md border p-3">
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {matchFields(r, update)}
-                  <Field label="Stop distance">
+                  <Field label="Distancia del stop">
                     <MonetaryField sensitive={r.mode === "price"}>
                       <input
                         type="number"
@@ -190,7 +191,7 @@ export function JournalDefaultSettings() {
                       />
                     </MonetaryField>
                   </Field>
-                  <Field label="Target distance">
+                  <Field label="Distancia del objetivo">
                     <MonetaryField sensitive={r.mode === "price"}>
                       <input
                         type="number"
@@ -202,14 +203,14 @@ export function JournalDefaultSettings() {
                       />
                     </MonetaryField>
                   </Field>
-                  <Field label="Distance unit">
+                  <Field label="Unidad de distancia">
                     <OptionSelect
                       className={fieldClass}
                       value={r.mode}
                       onValueChange={(next) => update({ ...r, mode: next as RiskRule["mode"] })}
                     >
-                      <option value="price">Price points</option>
-                      <option value="percent">% of entry price</option>
+                      <option value="price">Puntos de precio</option>
+                      <option value="percent">% del precio de entrada</option>
                     </OptionSelect>
                   </Field>
                 </div>
@@ -220,7 +221,7 @@ export function JournalDefaultSettings() {
                     setDraft({ ...draft, riskRules: draft.riskRules.filter((x) => x.id !== r.id) })
                   }
                 >
-                  Remove risk rule
+                  Quitar regla de riesgo
                 </Button>
               </div>
             );
@@ -245,7 +246,7 @@ export function JournalDefaultSettings() {
               })
             }
           >
-            Add risk rule
+            Añadir regla de riesgo
           </Button>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -253,15 +254,15 @@ export function JournalDefaultSettings() {
             disabled={!data}
             onClick={async () => {
               try {
-                setStatus("Saving…");
+                setStatus("Guardando…");
                 await postJson("/api/workspace/defaults", draft);
-                setStatus("Defaults saved");
+                setStatus("Valores por defecto guardados");
               } catch (e) {
-                setStatus(e instanceof Error ? e.message : "Save failed.");
+                setStatus(e instanceof Error ? e.message : "Error al guardar.");
               }
             }}
           >
-            Save defaults
+            Guardar valores por defecto
           </Button>
           <span role="status" className="text-xs">
             {status}

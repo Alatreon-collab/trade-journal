@@ -85,21 +85,21 @@ export function FilterBar({ title, actions }: { title: string; actions?: React.R
                     router.replace(`${pathname}?${next}`);
                   }}
                 >
-                  {range === "all" ? "All" : range.toUpperCase()}
+                  {range === "all" ? "Todo" : range === "ytd" ? "Año" : range.toUpperCase()}
                 </Button>
               ))}
             </div>
             <Button
               variant="outline"
               size="sm"
-              title="Filter by dates, symbols, strategy, outcome, and more. All selected conditions must match."
+              title="Filtra por fechas, símbolos, estrategia, resultado y más. Se tienen que cumplir todas las condiciones seleccionadas."
               onClick={() => {
                 setDraft(filters.values);
                 setOpen(true);
               }}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
-              Filters{count > 0 ? ` · ${count}` : ""}
+              Filtros{count > 0 ? ` · ${count}` : ""}
             </Button>
           </>
         )}
@@ -119,11 +119,11 @@ export function FilterBar({ title, actions }: { title: string; actions?: React.R
         >
           <DialogHeader className="journal-filter-heading">
             <DialogTitle ref={filterTitle} tabIndex={-1} className="outline-none">
-              Filter your journal
+              Filtrar el journal
             </DialogTitle>
             <DialogDescription className="journal-filter-description">
-              Times use {filters.timeZone}. Dates use the closing day, or opening day for open
-              trades. All selected conditions must match.
+              Las horas usan {filters.timeZone}. Las fechas usan el día de cierre, o el de apertura
+              para los trades abiertos. Se tienen que cumplir todas las condiciones seleccionadas.
             </DialogDescription>
           </DialogHeader>
           <div className="journal-filter-body">
@@ -135,10 +135,10 @@ export function FilterBar({ title, actions }: { title: string; actions?: React.R
               className="text-muted-foreground hover:text-foreground"
               onClick={() => setDraft({})}
             >
-              Clear filters
+              Quitar filtros
             </Button>
             <Button className="min-w-28" onClick={apply}>
-              Apply filters
+              Aplicar filtros
             </Button>
           </div>
         </DialogContent>

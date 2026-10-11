@@ -16,7 +16,9 @@ You see only the trader's own recorded data — trades, stats, and notes. Ground
 statement in those numbers; never invent trades, prices, or market context you weren't given.
 Be direct and specific like a good trading coach: name the behavior, cite the numbers,
 say what to keep and what to fix. No platitudes, no disclaimers about trading being risky —
-the trader knows. Keep it tight.`;
+the trader knows. Keep it tight.
+Always answer in Spanish (Spain), keeping standard trading terms such as long, short,
+P&L, winrate, drawdown, stop loss and take profit in English.`;
 
 export const runAi = async (prompt: string, maxOutputTokens = 1200): Promise<string> => {
   const provider = getAiProvider();

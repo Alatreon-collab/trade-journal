@@ -23,7 +23,7 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
         if (current === null) localStorage.setItem(PRIVACY_KEY, String(saved));
         setError("");
       } catch {
-        setError("Could not read your privacy preference.");
+        setError("No se pudo leer tu preferencia de privacidad.");
       }
       setReady(true);
     };
@@ -42,7 +42,9 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(PRIVACY_KEY, String(next));
       setError("");
     } catch {
-      setError("Privacy changed for this page, but could not be saved in this browser.");
+      setError(
+        "La privacidad ha cambiado en esta página, pero no se pudo guardar en este navegador.",
+      );
     }
   };
   return (
@@ -72,15 +74,15 @@ export function PrivacyToggle({
         }
         size="sm"
         variant={enabled ? "secondary" : "outline"}
-        aria-label={`Privacy mode ${enabled ? "on" : "off"}`}
+        aria-label={`Modo privado ${enabled ? "activado" : "desactivado"}`}
         aria-pressed={enabled}
         disabled={!ready}
         onClick={toggle}
-        title="Hide balances, P&L and trade prices across the journal"
+        title="Oculta saldos, P&L y precios de los trades en todo el journal"
       >
         {enabled ? <EyeOff /> : <Eye />}
-        {!iconOnly && (compact ? "Privacy" : "Privacy mode")}
-        {!iconOnly && <span className="ml-auto text-xs">{enabled ? "On" : "Off"}</span>}
+        {!iconOnly && (compact ? "Privado" : "Modo privado")}
+        {!iconOnly && <span className="ml-auto text-xs">{enabled ? "Sí" : "No"}</span>}
       </Button>
       {error && (
         <p
@@ -99,7 +101,7 @@ export function PrivacyToggle({
 }
 
 export function MonetaryValue({ children }: { children: ReactNode }) {
-  return usePrivacy() ? <span aria-label="Monetary value hidden">••••</span> : children;
+  return usePrivacy() ? <span aria-label="Importe oculto">••••</span> : children;
 }
 
 export function MonetaryField({
@@ -111,10 +113,10 @@ export function MonetaryField({
 }) {
   const enabled = usePrivacy();
   return enabled && sensitive ? (
-    <HoverHint content="Turn off privacy mode to edit this value">
+    <HoverHint content="Desactiva el modo privado para editar este valor">
       <div
         className="flex h-9 items-center rounded-md border px-3 text-sm"
-        aria-label="Monetary value hidden"
+        aria-label="Importe oculto"
         tabIndex={0}
       >
         ••••

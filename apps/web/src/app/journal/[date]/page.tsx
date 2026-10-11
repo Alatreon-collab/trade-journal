@@ -67,29 +67,29 @@ function JournalDay({ date }: { date: string }) {
   const m = data?.metrics;
   return (
     <div>
-      <FilterBar title={`Journal · ${date}`} />
+      <FilterBar title={`Diario · ${date}`} />
       <div className="grid gap-3 p-4 xl:grid-cols-3">
         <div className="min-w-0 space-y-3 xl:col-span-2">
           {m && m.closedTrades > 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle>Day stats</CardTitle>
+                <CardTitle>Estadísticas del día</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-3 2xl:grid-cols-5">
-                <Stat label="Net P&L">
+                <Stat label="P&L neto">
                   <Pnl value={m.netPnl} className="font-semibold" />
                 </Stat>
                 <Stat label="Trades">{m.closedTrades}</Stat>
                 <Stat label="Winrate">{fmtPercent(m.winRate)}</Stat>
-                <Stat label="Winners">{m.wins}</Stat>
-                <Stat label="Losers">{m.losses}</Stat>
-                <Stat label="Gross">
+                <Stat label="Ganadores">{m.wins}</Stat>
+                <Stat label="Perdedores">{m.losses}</Stat>
+                <Stat label="Bruto">
                   <MonetaryValue>{fmtMoney(m.grossPnl)}</MonetaryValue>
                 </Stat>
-                <Stat label="Fees">
+                <Stat label="Comisiones">
                   <MonetaryValue>{fmtMoney(m.fees)}</MonetaryValue>
                 </Stat>
-                <Stat label="Volume">{fmtNumber(m.totalVolume, 0)}</Stat>
+                <Stat label="Volumen">{fmtNumber(m.totalVolume, 0)}</Stat>
                 <Stat label="Profit factor">
                   {m.profitFactorIsInfinite
                     ? "∞"
@@ -97,7 +97,7 @@ function JournalDay({ date }: { date: string }) {
                       ? "–"
                       : fmtNumber(m.profitFactor)}
                 </Stat>
-                <Stat label="Expectancy">
+                <Stat label="Esperanza">
                   <MonetaryValue>
                     {m.expectancy === null ? "–" : fmtMoney(m.expectancy)}
                   </MonetaryValue>
@@ -108,7 +108,7 @@ function JournalDay({ date }: { date: string }) {
             m && (
               <Card>
                 <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                  No closed trades this day.
+                  No hay trades cerrados este día.
                 </CardContent>
               </Card>
             )
@@ -117,7 +117,7 @@ function JournalDay({ date }: { date: string }) {
           {data && data.intraday.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Intraday cumulative net P&L</CardTitle>
+                <CardTitle>P&L neto acumulado intradía</CardTitle>
               </CardHeader>
               <CardContent>
                 <EquityArea
@@ -181,7 +181,7 @@ function JournalDay({ date }: { date: string }) {
 
         <Card className="h-fit">
           <CardHeader className="flex-row flex-wrap items-center justify-between gap-2">
-            <CardTitle>Day note</CardTitle>
+            <CardTitle>Nota del día</CardTitle>
             <div className="flex items-center gap-2">
               <VoiceNote
                 onPrepare={() => noteEditor.current?.focus()}
@@ -195,8 +195,9 @@ function JournalDay({ date }: { date: string }) {
           </CardHeader>
           <CardContent>
             <p className="mb-3 text-xs text-muted-foreground">
-              This note is shared across accounts. AI recaps use the selected filters and append a
-              labeled section. Shared notes are excluded from filtered AI context.
+              Esta nota es común a todas las cuentas. Los resúmenes con IA usan los filtros
+              seleccionados y añaden una sección con su título. Las notas compartidas no se incluyen
+              en el contexto filtrado de la IA.
             </p>
             <div className="mb-3">
               <AiRecap
@@ -207,7 +208,7 @@ function JournalDay({ date }: { date: string }) {
                 disabled={!data || !m?.closedTrades}
                 onRecap={({ recap, scope }) => {
                   // Append to the current draft, including edits made while AI was running.
-                  const section = `## AI recap\n\n${scope.label.replace(/[\\`*_{}\[\]<>#]/g, "").replace(/[\r\n]+/g, " ")}\n\n${recap}`;
+                  const section = `## Resumen IA\n\n${scope.label.replace(/[\\`*_{}\[\]<>#]/g, "").replace(/[\r\n]+/g, " ")}\n\n${recap}`;
                   scheduleSave(
                     latestNote.current ? `${latestNote.current}\n\n---\n\n${section}` : section,
                   );
@@ -226,16 +227,16 @@ function JournalDay({ date }: { date: string }) {
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span role="status">{saving}</span>
               <Button variant="ghost" size="sm" onClick={() => void flush()}>
-                Save now
+                Guardar ahora
               </Button>
             </div>
             <ReviewExport
               containsFinancialData
               document={{
-                title: `Daily review · ${date}`,
-                subtitle: query ? `Filters: ${query}` : "All accounts",
+                title: `Revisión diaria · ${date}`,
+                subtitle: query ? `Filtros: ${query}` : "Todas las cuentas",
                 lines: [
-                  `Closed trades: ${m?.closedTrades ?? 0} | Net P&L: ${m?.netPnl.toFixed(2) ?? "0.00"}`,
+                  `Trades cerrados: ${m?.closedTrades ?? 0} | P&L neto: ${m?.netPnl.toFixed(2) ?? "0.00"}`,
                   "",
                   noteValue,
                 ],

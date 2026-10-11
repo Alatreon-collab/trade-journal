@@ -26,7 +26,7 @@ export function EquityArea({
   data,
   height = 240,
   valueFormat = "money",
-  valueLabel = "Cumulative P&L",
+  valueLabel = "P&L acumulado",
   currency = "USD",
   curve = "monotone",
 }: {
@@ -91,7 +91,7 @@ export function EquityArea({
           <Tooltip
             contentStyle={tooltipStyle(t)}
             labelFormatter={(value) => String(value).slice(0, 10)}
-            formatter={(value) => [privateMode ? "Hidden" : formatValue(Number(value)), valueLabel]}
+            formatter={(value) => [privateMode ? "Oculto" : formatValue(Number(value)), valueLabel]}
             cursor={{ stroke: t.inkMuted, strokeDasharray: "3 3" }}
           />
           <Area

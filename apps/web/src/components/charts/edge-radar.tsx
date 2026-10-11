@@ -16,12 +16,12 @@ import { tooltipStyle, useVizTokens } from "./tokens";
 import { ChartFrame } from "./chart-frame";
 
 const LABELS: Record<keyof EdgeScoreComponents, string> = {
-  winRate: "Win %",
+  winRate: "% ganadores",
   profitFactor: "Profit factor",
-  avgWinLoss: "Avg win/loss",
+  avgWinLoss: "Gan./pérd. media",
   drawdown: "Drawdown",
-  recovery: "Recovery",
-  consistency: "Consistency",
+  recovery: "Recuperación",
+  consistency: "Consistencia",
 };
 
 /** The open Edge Score, drawn from its six 0-100 components. */

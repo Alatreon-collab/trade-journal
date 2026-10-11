@@ -84,7 +84,7 @@ const click = (text: string) =>
     expect(button, text).toBeTruthy();
     button!.click();
   });
-const suggestion = "What's my most expensive mistake?";
+const suggestion = "¿Cuál es el error que más me cuesta?";
 const reply = (answer: string) => ({
   answer,
   scope: { label: "Account A · UTC", timeZone: "UTC" },
@@ -131,7 +131,7 @@ it.each(["accounts", "symbol", "timezone"])(
     await click(suggestion);
     await act(async () => old.resolve(reply("OLD RESULT")));
     expect(container.textContent).not.toContain("OLD RESULT");
-    expect(container.textContent).toContain("Thinking");
+    expect(container.textContent).toContain("Pensando");
     await act(async () => current.resolve(reply("CURRENT RESULT")));
     expect(container.textContent).toContain("CURRENT RESULT");
   },
@@ -150,8 +150,8 @@ it("ignores old errors and allows retry after a current failure", async () => {
   await act(async () => old.reject(new Error("OLD ERROR")));
   expect(container.querySelector("[data-ai-notice]")).toBeNull();
   await click(suggestion);
-  expect(container.textContent).toContain("Couldn’t complete the AI request");
-  await click("Try again");
+  expect(container.textContent).toContain("No se pudo completar la petición a la IA");
+  await click("Reintentar");
   expect(container.textContent).toContain("Retry answer");
 });
 
@@ -178,7 +178,7 @@ it("appends a labeled recap to edits made while generation is pending", async ()
   const pending = deferred();
   state.post.mockReturnValue(pending.promise);
   await renderDay();
-  await click("AI recap");
+  await click("Resumen con IA");
   expect(state.post).toHaveBeenCalledWith("/api/ai/recap", {
     date: "2026-09-15",
     filters: { accounts: "a" },
@@ -203,7 +203,7 @@ it.each(["account", "date", "unmount"])(
     const pending = deferred();
     state.post.mockReturnValue(pending.promise);
     await renderDay();
-    await click("AI recap");
+    await click("Resumen con IA");
     if (change === "account") {
       state.filters = { accounts: "b" };
       await renderDay();

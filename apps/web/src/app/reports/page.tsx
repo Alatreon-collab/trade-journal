@@ -22,12 +22,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useApi } from "@/lib/use-api";
 import { describeFilters } from "@/lib/filter-description";
 import { fmtDuration } from "@/lib/utils";
+import { groupLabel } from "@/lib/group-labels";
 const TradeExplorer = dynamic(
   () => import("@/components/trade-explorer").then((module) => module.TradeExplorer),
   {
     loading: () => (
       <p role="status" className="py-6 text-sm text-muted-foreground">
-        Loading trade explorer…
+        Cargando explorador de trades…
       </p>
     ),
   },
@@ -37,7 +38,7 @@ const PerformanceTrendsReport = dynamic(
   {
     loading: () => (
       <p role="status" className="py-6 text-sm text-muted-foreground">
-        Loading performance trends…
+        Cargando tendencias de rendimiento…
       </p>
     ),
   },
@@ -64,19 +65,19 @@ function Summary({ data }: { data: Analysis }) {
     <div className="report-summary">
       <div className="report-summary-grid grid grid-cols-2 gap-4">
         {[
-          ["Closed trades", String(s.trades)],
-          ["Net P&L", money(s.netPnl, data.currencies[0] ?? "USD")],
-          ["Win rate", percent(s.winRate)],
+          ["Trades cerrados", String(s.trades)],
+          ["P&L neto", money(s.netPnl, data.currencies[0] ?? "USD")],
+          ["Winrate", percent(s.winRate)],
           ["Profit factor", s.noLosses ? "∞" : number(s.profitFactor)],
-          ["Entry volume", number(s.volume)],
-          ["Avg holding time", fmtDuration(s.avgDurationMs)],
-          ["Avg planned R", number(s.avgPlannedR)],
-          ["Avg realized R", number(s.avgRealizedR)],
+          ["Volumen de entrada", number(s.volume)],
+          ["Tiempo medio en el trade", fmtDuration(s.avgDurationMs)],
+          ["R planificado medio", number(s.avgPlannedR)],
+          ["R realizado medio", number(s.avgRealizedR)],
         ].map(([label, value]) => (
           <div key={label}>
             <p className="text-xs text-muted-foreground">{label}</p>
             <p className="mt-1 break-words text-base font-semibold tabular-nums sm:text-lg">
-              {label === "Net P&L" ? <MonetaryValue>{value}</MonetaryValue> : value}
+              {label === "P&L neto" ? <MonetaryValue>{value}</MonetaryValue> : value}
             </p>
           </div>
         ))}
@@ -110,7 +111,7 @@ function DimensionSelect({
   );
 }
 const labels = (data: Analysis, key: string) =>
-  data.playbooks.find((p) => p.id === key)?.name ?? key;
+  data.playbooks.find((p) => p.id === key)?.name ?? groupLabel(key);
 function GroupLabel({ dimension, children }: { dimension: Dimension; children: string }) {
   return dimension === "entryPrice" || dimension === "exitPrice" ? (
     <MonetaryValue>{children}</MonetaryValue>
@@ -129,8 +130,8 @@ function Breakdown({
   primary: Dimension;
   secondary: Dimension;
 }) {
-  const rowLabel = (k: string) => (primary === "playbook" ? labels(data, k) : k),
-    colLabel = (k: string) => (secondary === "playbook" ? labels(data, k) : k);
+  const rowLabel = (k: string) => (primary === "playbook" ? labels(data, k) : groupLabel(k)),
+    colLabel = (k: string) => (secondary === "playbook" ? labels(data, k) : groupLabel(k));
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const rows = [...new Set(data.groups.map((g) => g.row))],
     columns = [...new Set(data.groups.map((g) => g.column))].sort((a, b) =>
@@ -170,7 +171,7 @@ function Breakdown({
                       <HoverHint
                         key={c}
                         content={
-                          g ? `${g.trades} trades · Win rate ${percent(g.winRate)}` : "No trades"
+                          g ? `${g.trades} trades · Winrate ${percent(g.winRate)}` : "Sin trades"
                         }
                       >
                         <td
@@ -193,7 +194,8 @@ function Breakdown({
             </tbody>
           </table>
           <p className="mt-2 text-xs text-muted-foreground">
-            Cell values are net P&L in {data.currencies[0] ?? "account currency"}.
+            Los valores de las celdas son P&L neto en{" "}
+            {data.currencies[0] ?? "la divisa de la cuenta"}.
           </p>
         </div>
       )}
@@ -205,12 +207,12 @@ function Breakdown({
                 DIMENSIONS[primary],
                 ...(cross ? [DIMENSIONS[secondary]] : []),
                 "Trades",
-                "Win %",
-                "Net P&L",
-                "Entry volume",
-                "Avg planned R",
-                "Avg realized R",
-                "Avg duration",
+                "% ganadores",
+                "P&L neto",
+                "Volumen de entrada",
+                "R planificado medio",
+                "R realizado medio",
+                "Duración media",
               ].map((h) => (
                 <th key={h} className="whitespace-nowrap border-b px-3 py-3 text-left font-medium">
                   {h}
@@ -250,7 +252,7 @@ function Breakdown({
       </div>
       {!data.groups.length && (
         <p className="py-12 text-center text-sm text-muted-foreground">
-          No closed trades match these filters.
+          Ningún trade cerrado coincide con estos filtros.
         </p>
       )}
     </div>
@@ -278,18 +280,18 @@ function Reports() {
   const multi = (data?.currencies.length ?? 0) > 1;
   return (
     <div>
-      <FilterBar title="Reports" />
+      <FilterBar title="Informes" />
       <div className="space-y-4 p-4">
         <AskJournal />
         <div className="flex flex-wrap items-center gap-2">
           {(
             [
-              ["overview", "Overview"],
-              ["trends", "Performance trends"],
-              ["explorer", "Trade explorer"],
-              ["breakdown", "Breakdowns"],
-              ["cross", "Cross-analysis"],
-              ["compare", "Compare groups"],
+              ["overview", "Resumen"],
+              ["trends", "Tendencias"],
+              ["explorer", "Explorador de trades"],
+              ["breakdown", "Desglose"],
+              ["cross", "Análisis cruzado"],
+              ["compare", "Comparar grupos"],
             ] as const
           ).map(([key, name]) => (
             <Button
@@ -318,10 +320,10 @@ function Reports() {
                 <CardHeader>
                   <div className="flex flex-wrap items-end justify-between gap-4">
                     <div className="flex flex-wrap gap-3">
-                      <DimensionSelect label="Group by" value={primary} onChange={setPrimary} />
+                      <DimensionSelect label="Agrupar por" value={primary} onChange={setPrimary} />
                       {mode === "cross" && (
                         <DimensionSelect
-                          label="Then by"
+                          label="Y después por"
                           value={secondary}
                           onChange={setSecondary}
                         />
@@ -333,16 +335,16 @@ function Reports() {
                         document={{
                           title:
                             mode === "cross"
-                              ? `${DIMENSIONS[primary]} by ${DIMENSIONS[secondary]}`
-                              : `${DIMENSIONS[primary]} performance`,
-                          subtitle: `${data.timeZone} · ${data.currencies[0] ?? "Account currency"}`,
+                              ? `${DIMENSIONS[primary]} por ${DIMENSIONS[secondary]}`
+                              : `Rendimiento por ${DIMENSIONS[primary].toLowerCase()}`,
+                          subtitle: `${data.timeZone} · ${data.currencies[0] ?? "Divisa de la cuenta"}`,
                           lines: [
-                            `Filters: ${describeFilters(values, data.accounts, data.playbooks)}`,
-                            `Closed trades: ${data.summary.trades} | Net P&L: ${number(data.summary.netPnl)} | Win rate: ${percent(data.summary.winRate)}`,
+                            `Filtros: ${describeFilters(values, data.accounts, data.playbooks)}`,
+                            `Trades cerrados: ${data.summary.trades} | P&L neto: ${number(data.summary.netPnl)} | Winrate: ${percent(data.summary.winRate)}`,
                             "",
                             ...data.groups.map(
                               (g) =>
-                                `${labels(data, g.row)}${g.column ? ` / ${labels(data, g.column)}` : ""}: ${g.trades} trades | P&L ${number(g.netPnl)} | Win ${percent(g.winRate)} | Planned ${number(g.avgPlannedR)}R | Realized ${number(g.avgRealizedR)}R | Volume ${number(g.volume)} | Holding time ${fmtDuration(g.avgDurationMs)}`,
+                                `${labels(data, g.row)}${g.column ? ` / ${labels(data, g.column)}` : ""}: ${g.trades} trades | P&L ${number(g.netPnl)} | Winrate ${percent(g.winRate)} | Planificado ${number(g.avgPlannedR)}R | Realizado ${number(g.avgRealizedR)}R | Volumen ${number(g.volume)} | Tiempo en el trade ${fmtDuration(g.avgDurationMs)}`,
                             ),
                           ],
                         }}
@@ -356,11 +358,11 @@ function Reports() {
                       {error}
                     </p>
                   ) : loading ? (
-                    <p className="text-sm text-muted-foreground">Loading report…</p>
+                    <p className="text-sm text-muted-foreground">Cargando informe…</p>
                   ) : multi ? (
                     <p className="text-sm">
-                      These accounts use different currencies ({data?.currencies.join(", ")}).
-                      Select accounts with the same currency in Filters to compare monetary results.
+                      Estas cuentas usan divisas distintas ({data?.currencies.join(", ")}).
+                      Selecciona en Filtros cuentas con la misma divisa para comparar resultados.
                     </p>
                   ) : data ? (
                     <Summary data={data} />
@@ -373,7 +375,7 @@ function Reports() {
                     <CardTitle>
                       {mode === "cross"
                         ? `${DIMENSIONS[primary]} × ${DIMENSIONS[secondary]}`
-                        : `Performance by ${DIMENSIONS[primary].toLowerCase()}`}
+                        : `Rendimiento por ${DIMENSIONS[primary].toLowerCase()}`}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -387,12 +389,14 @@ function Reports() {
                 </Card>
               )}
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Closed trades only. Dates use the closing day; weekday and entry time use the
-                opening time in {data?.timeZone ?? "your journal timezone"}. Volume is total entry
-                quantity. R uses weighted entry and total entry quantity; missing or invalid risk
-                inputs are excluded from R averages. Derivatives require a configured multiplier for
-                realized R. Multiple tags or mistakes can place a trade in more than one group, so
-                those group totals can overlap.
+                Solo trades cerrados. Las fechas usan el día de cierre; el día de la semana y la
+                hora de entrada usan la hora de apertura en{" "}
+                {data?.timeZone ?? "la zona horaria del journal"}. El volumen es la cantidad total
+                de entrada. La R usa la entrada media ponderada y la cantidad total de entrada; los
+                trades sin riesgo válido no cuentan en las medias de R. Los derivados necesitan un
+                multiplicador configurado para calcular la R realizada. Un trade con varias
+                etiquetas o errores puede caer en más de un grupo, así que esos totales pueden
+                solaparse.
               </p>
             </>
           )}
@@ -405,8 +409,8 @@ function Comparison({ initial }: { initial: AnalysisFilters }) {
   const privateMode = usePrivacy();
   const [a, setA] = useState<AnalysisFilters>({ ...initial, direction: "long" }),
     [b, setB] = useState<AnalysisFilters>({ ...initial, direction: "short" }),
-    [nameA, setNameA] = useState("Long trades"),
-    [nameB, setNameB] = useState("Short trades"),
+    [nameA, setNameA] = useState("Trades long"),
+    [nameB, setNameB] = useState("Trades short"),
     [editing, setEditing] = useState<"a" | "b" | null>(null),
     [draft, setDraft] = useState<AnalysisFilters>({});
   const aa = useApi<Analysis>(`/api/analysis?${new URLSearchParams(a).toString()}`),
@@ -416,17 +420,18 @@ function Comparison({ initial }: { initial: AnalysisFilters }) {
   const metricLines = (name: string, d: Analysis) => [
     name,
     `Trades: ${d.summary.trades} | P&L: ${number(d.summary.netPnl)} ${d.currencies[0] ?? ""}`,
-    `Win rate: ${percent(d.summary.winRate)} | Planned R: ${number(d.summary.avgPlannedR)} | Realized R: ${number(d.summary.avgRealizedR)}`,
+    `Winrate: ${percent(d.summary.winRate)} | R planificado: ${number(d.summary.avgPlannedR)} | R realizado: ${number(d.summary.avgRealizedR)}`,
   ];
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Each group has its own filters. Compare strategies, accounts, periods, or trade
-        characteristics. Groups may overlap.
+        Cada grupo tiene sus propios filtros. Compara estrategias, cuentas, periodos o
+        características de los trades. Los grupos pueden solaparse.
       </p>
       {multi && (
         <p role="alert" className="rounded-md border p-3 text-sm">
-          Select accounts with the same currency in both groups. Currency conversion is not applied.
+          Selecciona cuentas con la misma divisa en los dos grupos. No se aplica conversión de
+          divisas.
         </p>
       )}
       <div className="grid gap-4 lg:grid-cols-2">
@@ -440,7 +445,7 @@ function Comparison({ initial }: { initial: AnalysisFilters }) {
             <CardHeader>
               <div className="flex flex-wrap items-center gap-3">
                 <input
-                  aria-label={`Group ${group.key.toUpperCase()} name`}
+                  aria-label={`Nombre del grupo ${group.key.toUpperCase()}`}
                   className={`${fieldClass} min-w-32 flex-1 font-semibold`}
                   value={group.name}
                   onChange={(e) => group.setName(e.target.value)}
@@ -453,7 +458,7 @@ function Comparison({ initial }: { initial: AnalysisFilters }) {
                     setEditing(group.key);
                   }}
                 >
-                  Edit filters
+                  Editar filtros
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground break-words">
@@ -471,7 +476,7 @@ function Comparison({ initial }: { initial: AnalysisFilters }) {
                   {group.result.error}
                 </p>
               ) : group.result.loading ? (
-                <p>Loading…</p>
+                <p>Cargando…</p>
               ) : group.result.data && !multi ? (
                 <Summary data={group.result.data} />
               ) : null}
@@ -483,7 +488,7 @@ function Comparison({ initial }: { initial: AnalysisFilters }) {
         <Card>
           <CardContent className="space-y-4 pt-5">
             <p className="text-sm">
-              {nameB} minus {nameA}:{" "}
+              {nameB} menos {nameA}:{" "}
               <strong>
                 <MonetaryValue>
                   {money(
@@ -492,15 +497,15 @@ function Comparison({ initial }: { initial: AnalysisFilters }) {
                   )}
                 </MonetaryValue>
               </strong>{" "}
-              net P&L · {number(bb.data.summary.trades - aa.data.summary.trades)} trades
+              P&L neto · {number(bb.data.summary.trades - aa.data.summary.trades)} trades
             </p>
             <ReviewExport
               containsFinancialData
               document={{
                 title: `${nameA} vs ${nameB}`,
                 lines: [
-                  `Group A: ${describeFilters(a, aa.data.accounts, aa.data.playbooks)}`,
-                  `Group B: ${describeFilters(b, bb.data.accounts, bb.data.playbooks)}`,
+                  `Grupo A: ${describeFilters(a, aa.data.accounts, aa.data.playbooks)}`,
+                  `Grupo B: ${describeFilters(b, bb.data.accounts, bb.data.playbooks)}`,
                   "",
                   ...metricLines(nameA, aa.data),
                   "",
@@ -519,12 +524,12 @@ function Comparison({ initial }: { initial: AnalysisFilters }) {
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Group {editing?.toUpperCase()} filters</DialogTitle>
+            <DialogTitle>Filtros del grupo {editing?.toUpperCase()}</DialogTitle>
           </DialogHeader>
           <FilterFields value={draft} onChange={setDraft} />
           <div className="flex justify-between">
             <Button variant="ghost" onClick={() => setDraft({})}>
-              Clear
+              Limpiar
             </Button>
             <Button
               onClick={() => {
@@ -533,7 +538,7 @@ function Comparison({ initial }: { initial: AnalysisFilters }) {
                 setEditing(null);
               }}
             >
-              Apply to group
+              Aplicar al grupo
             </Button>
           </div>
         </DialogContent>

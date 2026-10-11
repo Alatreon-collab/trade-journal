@@ -35,7 +35,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(THEME_KEY, next);
       setError("");
     } catch {
-      setError("Appearance changed, but your browser could not save it for next time.");
+      setError(
+        "La apariencia ha cambiado, pero tu navegador no pudo guardarla para la próxima vez.",
+      );
     }
   };
   return (
@@ -55,7 +57,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 export function ThemeToggle({ iconOnly = false }: { iconOnly?: boolean }) {
   const { theme, ready, toggle } = useContext(ThemeContext);
-  const label = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+  const label = theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
   return (
     <Button
       type="button"
@@ -72,7 +74,7 @@ export function ThemeToggle({ iconOnly = false }: { iconOnly?: boolean }) {
       title={iconOnly ? label : undefined}
     >
       {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
-      {!iconOnly && (theme === "dark" ? "Light mode" : "Dark mode")}
+      {!iconOnly && (theme === "dark" ? "Modo claro" : "Modo oscuro")}
     </Button>
   );
 }

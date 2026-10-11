@@ -15,7 +15,7 @@ const RollingTradeChart = dynamic(
   () => import("./charts/rolling-trade-chart").then((module) => module.RollingTradeChart),
   {
     loading: () => (
-      <div role="status" aria-label="Loading trend chart">
+      <div role="status" aria-label="Cargando gráfico de tendencia">
         <Skeleton className="h-60" />
       </div>
     ),
@@ -30,7 +30,7 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
   const [tableOpen, setTableOpen] = useState(false);
   const dateFormat = useMemo(
     () =>
-      new Intl.DateTimeFormat("en", {
+      new Intl.DateTimeFormat("es-ES", {
         timeZone: data?.timeZone ?? "UTC",
         dateStyle: "medium",
         timeStyle: "short",
@@ -41,7 +41,7 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
     return (
       <div
         role="status"
-        aria-label="Loading performance trends"
+        aria-label="Cargando tendencias de rendimiento"
         className="grid gap-3 md:grid-cols-2"
       >
         <Skeleton className="h-80" />
@@ -51,9 +51,11 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
   if (error || !data)
     return (
       <div role="alert" className="rounded-xl border p-5">
-        <p className="text-sm text-destructive">{error ?? "Unable to load performance trends."}</p>
+        <p className="text-sm text-destructive">
+          {error ?? "No se pudieron cargar las tendencias de rendimiento."}
+        </p>
         <Button onClick={refresh} variant="outline" size="sm" className="mt-3">
-          Try again
+          Reintentar
         </Button>
       </div>
     );
@@ -70,20 +72,20 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
     >
       <div>
         <h2 id="performance-trends-title" className="text-lg font-semibold">
-          Performance trends
+          Tendencias de rendimiento
         </h2>
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-          {trends.count} closed trades · Active account and filters · Closing order · {timeZone}
+          {trends.count} trades cerrados · Cuenta y filtros activos · Orden de cierre · {timeZone}
           {monetary && trends.count > 0 ? ` · ${currency}` : ""}
         </p>
       </div>
       {trends.count === 0 ? (
         <Card>
           <CardContent className="py-10 text-center">
-            <h3 className="font-medium">No closed trades in this selection</h3>
+            <h3 className="font-medium">No hay trades cerrados en esta selección</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Change the date range or filters to explore your trading history. Open positions are
-              excluded.
+              Cambia el rango de fechas o los filtros para explorar tu historial. Las posiciones
+              abiertas no se incluyen.
             </p>
           </CardContent>
         </Card>
@@ -94,9 +96,9 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
               role="note"
               className="rounded-xl border bg-muted/30 p-4 text-sm text-muted-foreground"
             >
-              These trades use different currencies ({currencies.join(", ")}). Win rate is
-              available; select accounts with one currency to compare P&L and largest trades. No
-              currency conversion is applied.
+              Estos trades usan divisas distintas ({currencies.join(", ")}). El winrate está
+              disponible; selecciona cuentas con una sola divisa para comparar el P&L y los mayores
+              trades. No se aplica conversión de divisas.
             </p>
           )}
           <div className={`grid items-start gap-3 ${monetary ? "lg:grid-cols-2" : ""}`}>
@@ -106,16 +108,18 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
               return (
                 <Card key={metric} className="min-w-0 overflow-hidden">
                   <CardHeader>
-                    <CardTitle>{rate ? "Win-rate trend" : "Average trade P&L trend"}</CardTitle>
+                    <CardTitle>
+                      {rate ? "Tendencia del winrate" : "Tendencia del P&L medio por trade"}
+                    </CardTitle>
                     <p className="text-xs text-muted-foreground">
-                      Last 20 closed trades at each point
-                      {rate ? " · Breakevens included" : " · After fees"}
+                      Últimos 20 trades cerrados en cada punto
+                      {rate ? " · Breakeven incluidos" : " · Tras comisiones"}
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <p className="text-xs text-muted-foreground">Latest full window</p>
+                        <p className="text-xs text-muted-foreground">Última ventana completa</p>
                         <p className="mt-1 text-2xl font-semibold tabular-nums">
                           {latest ? (
                             rate ? (
@@ -129,7 +133,7 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
                         </p>
                       </div>
                       <div className="text-right text-xs text-muted-foreground">
-                        <p>Selected-period {rate ? "win rate" : "average"}</p>
+                        <p>{rate ? "Winrate" : "Media"} del periodo</p>
                         <p className="mt-1 text-sm tabular-nums">
                           {rate ? (
                             fmtPercent(reference, 1)
@@ -149,15 +153,15 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
                           timeZone={timeZone}
                         />
                         <p className="text-xs text-muted-foreground">
-                          Closed-trade sequence · Dashed line: selected-period{" "}
-                          {rate ? "win rate" : "average"}
+                          Secuencia de trades cerrados · Línea discontinua:{" "}
+                          {rate ? "winrate" : "media"} del periodo
                         </p>
                       </>
                     ) : (
                       <div className="rounded-lg bg-muted/30 px-4 py-6 text-sm leading-relaxed text-muted-foreground">
                         {!latest
-                          ? `${20 - trends.count} more closed ${20 - trends.count === 1 ? "trade is" : "trades are"} needed for the first full 20-trade window.`
-                          : `Latest window available. A line chart appears at 27 closed trades, when there are 8 full windows to compare.`}
+                          ? `Faltan ${20 - trends.count} ${20 - trends.count === 1 ? "trade cerrado" : "trades cerrados"} para la primera ventana completa de 20 trades.`
+                          : `Ya hay una ventana disponible. El gráfico de líneas aparece con 27 trades cerrados, cuando hay 8 ventanas completas para comparar.`}
                       </div>
                     )}
                   </CardContent>
@@ -168,17 +172,17 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
           {monetary && (
             <Card className="min-w-0">
               <CardHeader>
-                <CardTitle>Largest winning and losing trade</CardTitle>
+                <CardTitle>Mayor trade ganador y perdedor</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Individual closed trades, after fees—not daily totals. Uses your journal’s
-                  win/loss classification.
+                  Trades cerrados individuales, tras comisiones (no totales diarios). Usa la
+                  clasificación de ganador/perdedor de tu journal.
                 </p>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
                 {(
                   [
-                    ["Largest winner", trends.largestWin],
-                    ["Largest loser", trends.largestLoss],
+                    ["Mayor ganador", trends.largestWin],
+                    ["Mayor perdedor", trends.largestLoss],
                   ] as const
                 ).map(([label, trade]) => (
                   <div key={label} className="min-w-0 rounded-lg border p-4">
@@ -202,8 +206,8 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
                       </>
                     ) : (
                       <p className="mt-3 text-sm text-muted-foreground">
-                        No {label === "Largest winner" ? "winning" : "losing"} trades in this
-                        selection.
+                        No hay trades {label === "Mayor ganador" ? "ganadores" : "perdedores"} en
+                        esta selección.
                       </p>
                     )}
                   </div>
@@ -217,25 +221,26 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
               onToggle={(event) => setTableOpen(event.currentTarget.open)}
             >
               <summary className="cursor-pointer rounded-xl px-4 py-3 text-sm font-medium">
-                Explore window values and trades
+                Ver los valores de cada ventana y sus trades
               </summary>
               {tableOpen && (
                 <div className="max-h-72 overflow-auto px-4 pb-4">
                   <table className="w-full text-left text-xs">
                     <caption className="pb-3 text-left text-muted-foreground">
-                      Each row covers 20 trades ending at the linked trade. Dates use {timeZone}.
+                      Cada fila cubre 20 trades que terminan en el trade enlazado. Las fechas usan{" "}
+                      {timeZone}.
                     </caption>
                     <thead>
                       <tr className="border-b">
                         <th scope="col" className="py-2 pr-3">
-                          Window / closing trade
+                          Ventana / trade de cierre
                         </th>
                         <th scope="col" className="px-2 text-right">
-                          Win rate
+                          Winrate
                         </th>
                         {monetary && (
                           <th scope="col" className="pl-2 text-right">
-                            Avg net P&L
+                            P&L neto medio
                           </th>
                         )}
                       </tr>
@@ -271,9 +276,9 @@ export function PerformanceTrendsReport({ query }: { query: string }) {
             </details>
           )}
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Only trades within your selection are used; earlier trades are not borrowed to fill a
-            window. Rolling windows overlap and describe recent results—not a forecast. Small
-            samples can change sharply.
+            Solo se usan los trades de tu selección; no se toman trades anteriores para completar
+            una ventana. Las ventanas móviles se solapan y describen resultados recientes, no son
+            una previsión. Con muestras pequeñas los valores pueden cambiar mucho.
           </p>
         </>
       )}

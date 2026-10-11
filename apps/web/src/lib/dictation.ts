@@ -20,17 +20,17 @@ export const dictationError = (code: string) => {
   switch (code) {
     case "not-allowed":
     case "service-not-allowed":
-      return "Microphone or speech access was blocked. Allow microphone access in your browser and system settings, then try again.";
+      return "Se ha bloqueado el acceso al micrófono o a la voz. Permite el micrófono en el navegador y en los ajustes del sistema, y vuelve a intentarlo.";
     case "audio-capture":
-      return "No microphone is available. Connect or enable a microphone, then try again.";
+      return "No hay micrófono disponible. Conecta o activa uno y vuelve a intentarlo.";
     case "no-speech":
-      return "No speech was detected. Try again and speak after the button says Listening.";
+      return "No se ha detectado voz. Vuelve a intentarlo y habla cuando el botón diga Escuchando.";
     case "network":
-      return "This browser could not reach its speech recognition service. Try Chrome with an internet connection, or use keyboard dictation below.";
+      return "Este navegador no ha podido conectar con su servicio de reconocimiento de voz. Prueba Chrome con conexión a internet o usa el dictado del teclado (abajo).";
     case "language-not-supported":
-      return "This browser does not support dictation in your current language. Use keyboard dictation below.";
+      return "Este navegador no admite el dictado en tu idioma actual. Usa el dictado del teclado (abajo).";
     default:
-      return "Speech recognition could not start in this browser. Try Chrome, or use keyboard dictation below.";
+      return "El reconocimiento de voz no ha podido arrancar en este navegador. Prueba Chrome o usa el dictado del teclado (abajo).";
   }
 };
 

@@ -64,7 +64,7 @@ export function DailyBars({
           <ReferenceLine y={0} stroke={t.baseline} />
           <Tooltip
             contentStyle={tooltipStyle(t)}
-            formatter={(value) => [privateMode ? "Hidden" : fmtMoney(Number(value)), "Net P&L"]}
+            formatter={(value) => [privateMode ? "Oculto" : fmtMoney(Number(value)), "P&L neto"]}
             cursor={{ fill: t.gridline, opacity: 0.4 }}
           />
           <Bar dataKey="netPnl" isAnimationActive={false} maxBarSize={28}>

@@ -57,15 +57,15 @@ function Playbooks() {
         actions={
           <Button size="sm" onClick={() => setOpen(true)}>
             <Plus />
-            New playbook
+            Nuevo playbook
           </Button>
         }
       />
       <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-3">
         {data?.playbooks.length === 0 && (
           <p className="col-span-full py-16 text-center text-sm text-muted-foreground">
-            A playbook is a setup you trade on purpose — name it, write its rules, then tag trades
-            with it and let Reports tell you if it actually pays.
+            Un playbook es un setup que operas a propósito: ponle nombre, escribe sus reglas,
+            asígnalo a tus trades y deja que Informes te diga si de verdad es rentable.
           </p>
         )}
         {data?.playbooks.map((playbook) => (
@@ -83,7 +83,7 @@ function Playbooks() {
                   onClick={async () => {
                     if (
                       confirm(
-                        `Delete "${playbook.name}"? Trades keep their data, just lose the link.`,
+                        `¿Borrar "${playbook.name}"? Los trades conservan sus datos; solo pierden el vínculo.`,
                       )
                     ) {
                       await postJson(`/api/playbooks/${playbook.id}`, undefined, "DELETE");
@@ -118,29 +118,29 @@ function Playbooks() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New playbook</DialogTitle>
+            <DialogTitle>Nuevo playbook</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <Input
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="Name (e.g. Opening range breakout)"
+              placeholder="Nombre (p. ej. Sweep + CISD en NY AM)"
             />
             <Input
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="One-line description"
+              placeholder="Descripción en una línea"
             />
             <Textarea
               value={rules}
               onChange={(event) => setRules(event.target.value)}
               placeholder={
-                "One rule per line:\nOnly A+ setups\nRisk max 1R\nNo entries after 11:30"
+                "Una regla por línea:\nSolo setups A+\nRiesgo máximo 1R\nSin entradas después de las 11:30"
               }
               className="min-h-32"
             />
             <Button onClick={create} disabled={!name}>
-              Create
+              Crear
             </Button>
           </div>
         </DialogContent>

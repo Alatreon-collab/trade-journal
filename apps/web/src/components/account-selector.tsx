@@ -27,9 +27,9 @@ export function AccountSelector() {
   const value = selected.length > 1 ? "multiple" : (selected[0] ?? "all");
   const label =
     selected.length > 1
-      ? `${selected.length} accounts`
+      ? `${selected.length} cuentas`
       : (accounts.find((a) => a.id === selected[0])?.name ??
-        (selected.length ? "Selected account" : "All accounts"));
+        (selected.length ? "Cuenta seleccionada" : "Todas las cuentas"));
 
   function selectAccount(id: string) {
     const next = new URLSearchParams(params.toString());
@@ -47,7 +47,9 @@ export function AccountSelector() {
       refresh();
       selectAccount(result.accountId);
     } catch (cause) {
-      setDemoError(cause instanceof Error ? cause.message : "Could not load demo data.");
+      setDemoError(
+        cause instanceof Error ? cause.message : "No se pudieron cargar los datos de demo.",
+      );
     } finally {
       setLoadingDemo(false);
     }
@@ -57,17 +59,17 @@ export function AccountSelector() {
     <div className="relative min-w-0 max-w-full">
       <Select value={value} onValueChange={(value) => void select(value)} disabled={loadingDemo}>
         <SelectTrigger
-          aria-label="Select account"
+          aria-label="Seleccionar cuenta"
           className="h-8 w-44 max-w-full rounded-lg text-xs"
         >
           <WalletCards className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <span className="min-w-0 flex-1 truncate text-left">
-            {loadingDemo ? "Loading demo…" : label}
+            {loadingDemo ? "Cargando demo…" : label}
           </span>
         </SelectTrigger>
         <SelectContent className="rounded-2xl border-white/10 p-1 shadow-2xl" align="end">
           <SelectItem value="all" className="rounded-lg text-xs">
-            All accounts
+            Todas las cuentas
           </SelectItem>
           {selected.length > 1 && (
             <SelectItem value="multiple" disabled className="text-xs">
@@ -80,7 +82,7 @@ export function AccountSelector() {
               <SelectItem key={account.id} value={account.id} className="rounded-lg text-xs">
                 <span className="block max-w-64 truncate">
                   {account.name}
-                  {account.archivedAt ? " (archived)" : ""}
+                  {account.archivedAt ? " (archivada)" : ""}
                 </span>
               </SelectItem>
             ))}
@@ -88,7 +90,7 @@ export function AccountSelector() {
           <SelectItem value={demo?.id ?? "load-demo"} className="rounded-lg text-xs">
             <span className="flex items-center gap-2">
               <FlaskConical className="h-3.5 w-3.5 text-muted-foreground" />
-              {demo?.name ?? "Load demo data"}
+              {demo?.name ?? "Cargar datos de demo"}
             </span>
           </SelectItem>
         </SelectContent>

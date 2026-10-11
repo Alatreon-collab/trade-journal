@@ -61,10 +61,12 @@ export function TimeZonePicker({
           variant="outline"
           className="w-full min-w-0 justify-between font-normal"
           disabled={disabled}
-          aria-label={`${label}: ${value || "Choose a timezone"}`}
+          aria-label={`${label}: ${value || "Elige una zona horaria"}`}
           aria-describedby={describedBy}
         >
-          <span className="truncate">{value ? timeZoneLabel(value) : "Choose a timezone"}</span>
+          <span className="truncate">
+            {value ? timeZoneLabel(value) : "Elige una zona horaria"}
+          </span>
           <ChevronsUpDown className="shrink-0 text-muted-foreground" aria-hidden="true" />
         </Button>
       </Popover.Trigger>
@@ -87,12 +89,12 @@ export function TimeZonePicker({
             <Input
               ref={input}
               role="combobox"
-              aria-label="Search timezones"
+              aria-label="Buscar zonas horarias"
               aria-expanded={open}
               aria-autocomplete="list"
               aria-controls={listId}
               aria-activedescendant={activeId}
-              placeholder="Search city or timezone…"
+              placeholder="Busca una ciudad o zona horaria…"
               className="pl-8"
               value={query}
               autoComplete="off"
@@ -122,7 +124,7 @@ export function TimeZonePicker({
           <div
             id={listId}
             role="listbox"
-            aria-label="Timezones"
+            aria-label="Zonas horarias"
             className="mt-1 min-h-0 overflow-y-auto overscroll-contain"
           >
             {options.map((zone, index) => (
@@ -149,8 +151,8 @@ export function TimeZonePicker({
           </div>
           <p role="status" className="shrink-0 px-2 pb-1 pt-2 text-xs text-muted-foreground">
             {options.length
-              ? `${options.length} timezone${options.length === 1 ? "" : "s"}`
-              : "No matching timezone. Try a city or a full timezone name."}
+              ? `${options.length} zona${options.length === 1 ? "" : "s"} horaria${options.length === 1 ? "" : "s"}`
+              : "Ninguna zona horaria coincide. Prueba con una ciudad o el nombre completo."}
           </p>
         </Popover.Content>
       </Popover.Portal>

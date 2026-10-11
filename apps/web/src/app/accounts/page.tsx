@@ -59,10 +59,10 @@ function Accounts() {
       }>(id, { action: "sync" });
       if (outcome.skipped > 0)
         alert(
-          `Sync finished with ${outcome.inserted} new fills. ${outcome.skipped} broker record(s) were skipped: ${outcome.skippedReasons.join(" ")}`,
+          `Sincronización terminada con ${outcome.inserted} ejecuciones nuevas. Se omitieron ${outcome.skipped} registro(s) del bróker: ${outcome.skippedReasons.join(" ")}`,
         );
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Sync failed");
+      alert(error instanceof Error ? error.message : "Falló la sincronización");
     } finally {
       setSyncing(null);
     }
@@ -70,11 +70,11 @@ function Accounts() {
 
   return (
     <div>
-      <FilterBar title="Accounts" />
+      <FilterBar title="Cuentas" />
       <div className="grid gap-3 p-4 md:grid-cols-2">
         {data?.accounts.length === 0 && (
           <p className="col-span-full py-16 text-center text-sm text-muted-foreground">
-            No accounts yet — create one on the Import page.
+            Aún no hay cuentas: crea una en la página Importar.
           </p>
         )}
         {data?.accounts.map((account) => (
@@ -83,7 +83,11 @@ function Accounts() {
               <CardTitle className="min-w-0 flex-1 text-base font-semibold normal-case tracking-normal text-foreground">
                 <span className="block break-words">{account.name}</span>
                 <Badge variant="secondary" className="mt-1.5 mr-2">
-                  {account.kind}
+                  {account.kind === "sync"
+                    ? "sincronizada"
+                    : account.kind === "import"
+                      ? "importada"
+                      : "manual"}
                 </Badge>
                 {account.broker && (
                   <span className="text-xs font-normal text-muted-foreground">
@@ -99,7 +103,7 @@ function Accounts() {
                     className="h-8 w-8"
                     disabled={syncing === account.id}
                     onClick={() => void sync(account.id)}
-                    title="Sync now"
+                    title="Sincronizar ahora"
                   >
                     <RefreshCw className={syncing === account.id ? "animate-spin" : undefined} />
                   </Button>
@@ -108,7 +112,7 @@ function Accounts() {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8"
-                  title={account.archivedAt ? "Unarchive" : "Archive"}
+                  title={account.archivedAt ? "Desarchivar" : "Archivar"}
                   onClick={() =>
                     void action(account.id, {
                       action: account.archivedAt ? "unarchive" : "archive",
@@ -121,10 +125,10 @@ function Accounts() {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                  title="Delete account"
+                  title="Borrar cuenta"
                   onClick={async () => {
                     if (
-                      confirm(`Delete "${account.name}" and ALL its trades? This cannot be undone.`)
+                      confirm(`¿Borrar "${account.name}" y TODOS sus trades? No se puede deshacer.`)
                     ) {
                       await postJson(`/api/accounts/${account.id}`, undefined, "DELETE");
                       refresh();
@@ -138,12 +142,12 @@ function Accounts() {
             <CardContent className="space-y-3">
               {account.snapshot && (
                 <div className="text-sm">
-                  Broker equity:{" "}
+                  Equity en el bróker:{" "}
                   <span className="tnum font-medium">
                     <MonetaryValue>{fmtMoney(account.snapshot.equity)}</MonetaryValue>
                   </span>
                   <span className="ml-2 text-xs text-muted-foreground">
-                    {account.snapshot.positions.length} open positions · synced{" "}
+                    {account.snapshot.positions.length} posiciones abiertas · sincronizado{" "}
                     {account.lastSyncAt?.slice(0, 16).replace("T", " ")}
                   </span>
                 </div>
@@ -151,7 +155,7 @@ function Accounts() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="text-xs text-muted-foreground">
-                    Initial balance (anchors drawdown %)
+                    Saldo inicial (base del % de drawdown)
                   </label>
                   <MonetaryField>
                     <Input
@@ -173,7 +177,7 @@ function Accounts() {
                   </MonetaryField>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">Profit calculation</label>
+                  <label className="text-xs text-muted-foreground">Cálculo del beneficio</label>
                   <Select
                     value={account.profitCalcMethod}
                     onValueChange={async (value) => {
@@ -191,7 +195,7 @@ function Accounts() {
                     <SelectContent>
                       <SelectItem value="fifo">FIFO</SelectItem>
                       <SelectItem value="lifo">LIFO</SelectItem>
-                      <SelectItem value="wavg">Weighted average</SelectItem>
+                      <SelectItem value="wavg">Media ponderada</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -201,33 +205,38 @@ function Accounts() {
                   variant="outline"
                   size="sm"
                   onClick={async () => {
-                    if (confirm(`Clear ALL trades from "${account.name}"? The account stays.`)) {
+                    if (
+                      confirm(
+                        `¿Borrar TODOS los trades de "${account.name}"? La cuenta se mantiene.`,
+                      )
+                    ) {
                       await action(account.id, { action: "clear" });
                     }
                   }}
                 >
-                  Clear trades
+                  Vaciar trades
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={async () => {
                     const others = data.accounts.filter((candidate) => candidate.id !== account.id);
-                    if (others.length === 0) return alert("No other account to transfer into.");
+                    if (others.length === 0)
+                      return alert("No hay otra cuenta a la que transferir.");
                     const target = prompt(
-                      `Transfer all data into which account?\n${others.map((candidate, index) => `${index + 1}. ${candidate.name}`).join("\n")}\n\nEnter a number:`,
+                      `¿A qué cuenta quieres transferir todos los datos?\n${others.map((candidate, index) => `${index + 1}. ${candidate.name}`).join("\n")}\n\nEscribe un número:`,
                     );
                     const chosen = others[Number(target) - 1];
                     if (chosen) {
                       try {
                         await action(account.id, { action: "transfer", toAccountId: chosen.id });
                       } catch (error) {
-                        alert(error instanceof Error ? error.message : "Transfer failed");
+                        alert(error instanceof Error ? error.message : "Falló la transferencia");
                       }
                     }
                   }}
                 >
-                  Transfer data
+                  Transferir datos
                 </Button>
               </div>
             </CardContent>

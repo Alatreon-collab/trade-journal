@@ -23,7 +23,7 @@ export function RuleChecklist({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Strategy rule review</CardTitle>
+        <CardTitle>Revisión de reglas de la estrategia</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {data?.name ? (
@@ -31,13 +31,13 @@ export function RuleChecklist({
             <p className="text-sm font-medium">{data.name}</p>
             <p className="text-xs text-muted-foreground">
               {evaluated.length
-                ? `${Math.round((followed / evaluated.length) * 100)}% followed · `
+                ? `${Math.round((followed / evaluated.length) * 100)}% cumplidas · `
                 : ""}
-              {evaluated.length}/{data.rules.length} rules assessed
+              {evaluated.length}/{data.rules.length} reglas evaluadas
             </p>
             {data.rules.length === 0 && (
               <p className="text-xs text-muted-foreground">
-                Add rules to this playbook to review adherence.
+                Añade reglas a este playbook para revisar si las cumples.
               </p>
             )}
             {data.rules.map((r) => (
@@ -63,16 +63,16 @@ export function RuleChecklist({
                     }
                   }}
                 >
-                  <option value="unreviewed">Not assessed</option>
-                  <option value="true">Followed</option>
-                  <option value="false">Broken</option>
+                  <option value="unreviewed">Sin evaluar</option>
+                  <option value="true">Cumplida</option>
+                  <option value="false">Rota</option>
                 </OptionSelect>
               </label>
             ))}
           </>
         ) : (
           <p className="text-xs text-muted-foreground">
-            Assign a playbook to check its rules for this trade.
+            Asigna un playbook para revisar sus reglas en este trade.
           </p>
         )}
         {(error || failure) && (

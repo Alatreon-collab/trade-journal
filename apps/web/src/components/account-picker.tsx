@@ -76,7 +76,7 @@ export function AccountPicker({
       setName("");
       setBalance("0");
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Account creation failed.");
+      setError(cause instanceof Error ? cause.message : "No se pudo crear la cuenta.");
     } finally {
       setSaving(false);
     }
@@ -85,11 +85,11 @@ export function AccountPicker({
     <div className="flex min-w-0 flex-wrap items-end gap-2">
       <div className="min-w-0 flex-[1_1_180px]">
         <Label htmlFor={`${fieldId}-account`} className="mb-1 block text-xs text-muted-foreground">
-          Into account
+          En la cuenta
         </Label>
         <Select value={value} onValueChange={onChange}>
           <SelectTrigger id={`${fieldId}-account`}>
-            <SelectValue placeholder="Choose an account" />
+            <SelectValue placeholder="Elige una cuenta" />
           </SelectTrigger>
           <SelectContent>
             {accounts.map((account) => (
@@ -110,7 +110,7 @@ export function AccountPicker({
         }}
         disabled={saving}
       >
-        {creating ? "Cancel new account" : "New account"}
+        {creating ? "Cancelar cuenta nueva" : "Cuenta nueva"}
       </Button>
       {accountError && (
         <p role="alert" className="w-full text-sm text-destructive">
@@ -125,10 +125,10 @@ export function AccountPicker({
             if (!saving) void create();
           }}
         >
-          <h3 className="text-sm font-medium">Create account</h3>
+          <h3 className="text-sm font-medium">Crear cuenta</h3>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="space-y-1">
-              <Label htmlFor={`${fieldId}-name`}>Account name</Label>
+              <Label htmlFor={`${fieldId}-name`}>Nombre de la cuenta</Label>
               <Input
                 id={`${fieldId}-name`}
                 autoFocus
@@ -137,11 +137,11 @@ export function AccountPicker({
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 disabled={saving}
-                placeholder="Trading test account"
+                placeholder="Tradeify 50K"
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor={`${fieldId}-currency`}>Currency</Label>
+              <Label htmlFor={`${fieldId}-currency`}>Divisa</Label>
               <Input
                 id={`${fieldId}-currency`}
                 required
@@ -153,7 +153,7 @@ export function AccountPicker({
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor={`${fieldId}-balance`}>Starting balance</Label>
+              <Label htmlFor={`${fieldId}-balance`}>Saldo inicial</Label>
               <Input
                 id={`${fieldId}-balance`}
                 required
@@ -182,7 +182,7 @@ export function AccountPicker({
               Number(balance) < 0
             }
           >
-            {saving ? "Creating…" : "Create account"}
+            {saving ? "Creando…" : "Crear cuenta"}
           </Button>
         </form>
       )}

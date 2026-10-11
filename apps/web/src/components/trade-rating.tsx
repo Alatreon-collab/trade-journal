@@ -32,7 +32,7 @@ export function TradeRating({
       await onChange(next);
     } catch {
       setRating(previous);
-      setError("Rating was not saved. Try again.");
+      setError("No se guardó la valoración. Inténtalo de nuevo.");
     } finally {
       setSaving(false);
     }
@@ -42,7 +42,7 @@ export function TradeRating({
     <div>
       <div
         role="group"
-        aria-label="Trade rating"
+        aria-label="Valoración del trade"
         className="flex items-center gap-0.5"
         onPointerLeave={() => setHovered(null)}
       >
@@ -50,7 +50,7 @@ export function TradeRating({
           <button
             key={star}
             type="button"
-            aria-label={`Rate ${star} stars`}
+            aria-label={`Valorar con ${star} estrellas`}
             aria-pressed={rating === star}
             aria-disabled={saving}
             onPointerEnter={() => setHovered(star)}

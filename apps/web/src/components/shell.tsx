@@ -34,21 +34,21 @@ import { HoverHint } from "./ui/tooltip";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/journal", label: "Daily journal", icon: NotebookPen },
+  { href: "/calendar", label: "Calendario", icon: CalendarDays },
+  { href: "/journal", label: "Diario", icon: NotebookPen },
   { href: "/trades", label: "Trades", icon: ListOrdered },
-  { href: "/reports", label: "Reports", icon: BarChart3 },
+  { href: "/reports", label: "Informes", icon: BarChart3 },
   { href: "/prop-firms", label: "Prop firms", icon: Landmark },
-  { href: "/notebook", label: "Notebook", icon: BookText },
+  { href: "/notebook", label: "Cuaderno", icon: BookText },
   { href: "/playbooks", label: "Playbooks", icon: BookOpen },
-  { href: "/progress", label: "Progress", icon: ListChecks },
-  { href: "/missed", label: "Missed trades", icon: BookmarkPlus },
+  { href: "/progress", label: "Progreso", icon: ListChecks },
+  { href: "/missed", label: "Trades perdidos", icon: BookmarkPlus },
 ] as const;
 
 const NAV_SETUP = [
-  { href: "/import", label: "Import", icon: Import },
-  { href: "/accounts", label: "Accounts", icon: Wallet },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/import", label: "Importar", icon: Import },
+  { href: "/accounts", label: "Cuentas", icon: Wallet },
+  { href: "/settings", label: "Ajustes", icon: Settings },
 ] as const;
 
 const SIDEBAR_COLLAPSED_KEY = "journal-sidebar-collapsed-v1";
@@ -148,7 +148,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   if (pathname === "/login") return <>{children}</>;
   const navigation = (collapsed = false) => (
     <nav
-      aria-label="Journal navigation"
+      aria-label="Navegación del journal"
       className="journal-sidebar-navigation min-h-0 flex-1 space-y-0.5 overflow-x-hidden overflow-y-auto overscroll-contain p-2"
       onClick={(event) => {
         if ((event.target as HTMLElement).closest("a")) setMenuOpen(false);
@@ -180,7 +180,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const footer = (
     <div className="journal-sidebar-footer space-y-1 border-t p-3 text-xs text-muted-foreground">
       <div>
-        Open source ·{" "}
+        Código abierto ·{" "}
         <a
           href="https://github.com/LuxAlgo/trade-journal"
           className="underline underline-offset-2 hover:text-foreground"
@@ -190,7 +190,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           GitHub
         </a>
       </div>
-      <div>Not investment advice.</div>
+      <div>No es asesoramiento financiero.</div>
     </div>
   );
   return (
@@ -202,7 +202,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               variant="ghost"
               size="icon"
               className="h-9 w-9 shrink-0"
-              aria-label="Open navigation"
+              aria-label="Abrir navegación"
             >
               <Menu />
             </Button>
@@ -223,7 +223,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                     variant="ghost"
                     size="icon"
                     className="ml-auto h-8 w-8"
-                    aria-label="Close navigation"
+                    aria-label="Cerrar navegación"
                   >
                     <X />
                   </Button>
@@ -265,10 +265,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
             size="icon"
             className="journal-sidebar-trigger absolute h-7 w-7 rounded-full bg-background shadow-sm"
             onClick={toggleSidebar}
-            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={sidebarCollapsed ? "Expandir barra lateral" : "Contraer barra lateral"}
             aria-expanded={!sidebarCollapsed}
             aria-keyshortcuts="Meta+B Control+B"
-            title={`${sidebarCollapsed ? "Expand" : "Collapse"} sidebar (⌘B)`}
+            title={`${sidebarCollapsed ? "Expandir" : "Contraer"} barra lateral (Ctrl+B)`}
           >
             {sidebarCollapsed ? (
               <PanelLeftOpen className="h-3.5 w-3.5" />

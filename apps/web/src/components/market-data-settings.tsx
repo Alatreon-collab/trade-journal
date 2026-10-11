@@ -18,20 +18,21 @@ export function MarketDataSettings() {
   return (
     <Card id="market-data" className="scroll-mt-24">
       <CardHeader>
-        <CardTitle>Market data</CardTitle>
+        <CardTitle>Datos de mercado</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Connect historical prices for estimated MAE/MFE and candle replay on closed trades. Vela
-          renders the charts. No data source is enabled or selected by default. Choose a connection
-          or upload your own candles. Market data connections are separate from broker sync and AI.
+          Conecta precios históricos para estimar el MAE/MFE y repetir las velas de los trades
+          cerrados. Los gráficos los dibuja Vela. No hay ninguna fuente activada por defecto: elige
+          una conexión o sube tus propias velas. Estas conexiones son independientes de la
+          sincronización con el bróker y de la IA.
         </p>
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         )}
-        {!data && !error && <p className="text-sm text-muted-foreground">Loading connections…</p>}
+        {!data && !error && <p className="text-sm text-muted-foreground">Cargando conexiones…</p>}
         {data?.connections
           .filter((connection) => connection.id !== "market-csv")
           .map((connection) => (
@@ -73,17 +74,17 @@ function Connection({
       setMessage(
         action === "test"
           ? publicSource
-            ? "Public endpoint reachable. No API key or paid data plan is required. Candle availability depends on the pair, date range and public API limits."
-            : "Connection verified. Instrument coverage depends on your provider access."
+            ? "Fuente pública accesible. No hace falta API key ni plan de pago. La disponibilidad de velas depende del par, del rango de fechas y de los límites de la API pública."
+            : "Conexión verificada. Los instrumentos disponibles dependen de tu acceso con el proveedor."
           : action === "save"
-            ? "Credentials saved. Test the connection to verify access."
+            ? "Credenciales guardadas. Prueba la conexión para verificar el acceso."
             : action === "enable"
-              ? "Public market data enabled."
-              : "Connection removed.",
+              ? "Datos de mercado públicos activados."
+              : "Conexión eliminada.",
       );
       refresh();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Connection update failed.");
+      setError(cause instanceof Error ? cause.message : "No se pudo actualizar la conexión.");
     } finally {
       setBusy(false);
     }
@@ -94,24 +95,24 @@ function Connection({
         <h3 className="text-sm font-medium">{connection.name}</h3>
         <span className="text-xs text-muted-foreground">
           {managed
-            ? "Managed by server environment"
+            ? "Gestionado por el entorno del servidor"
             : connection.configured
               ? publicSource
-                ? "Enabled · no key required"
-                : "Credentials saved"
-              : "Not connected"}
+                ? "Activado · no necesita clave"
+                : "Credenciales guardadas"
+              : "Sin conectar"}
         </span>
       </div>
       <p className="text-xs text-muted-foreground">{info.description}</p>
       {!publicSource && (
         <p className="text-xs text-muted-foreground">
-          Credentials are encrypted locally and used only by the server for market data. Saved
-          secrets are never returned to the browser or included in journal exports.
+          Las credenciales se cifran en local y solo las usa el servidor para los datos de mercado.
+          Nunca se devuelven al navegador ni se incluyen en las exportaciones del journal.
         </p>
       )}
       {managed && !connection.configured && (
         <p className="text-xs text-destructive">
-          Complete all required fields in the server environment.
+          Completa todos los campos obligatorios en el entorno del servidor.
         </p>
       )}
       {!managed &&
@@ -144,8 +145,8 @@ function Connection({
                 }
                 placeholder={
                   connection.configured
-                    ? `Enter replacement ${field.label.toLowerCase()}`
-                    : `Enter ${field.label.toLowerCase()}`
+                    ? `Nuevo valor: ${field.label.toLowerCase()}`
+                    : `Introduce: ${field.label.toLowerCase()}`
                 }
                 autoComplete="off"
                 spellCheck={false}
@@ -160,22 +161,22 @@ function Connection({
             disabled={busy || info.fields.some((field) => !fields[field.key]?.trim())}
             onClick={() => void act("save")}
           >
-            Save credentials
+            Guardar credenciales
           </Button>
         )}
         {publicSource && !connection.configured && (
           <Button disabled={busy} onClick={() => void act("enable")}>
-            Enable source
+            Activar fuente
           </Button>
         )}
         {connection.configured && (
           <Button variant="outline" disabled={busy} onClick={() => void act("test")}>
-            Test connection
+            Probar conexión
           </Button>
         )}
         {connection.configured && !managed && (
           <Button variant="outline" disabled={busy} onClick={() => void act("remove")}>
-            {publicSource ? "Disable source" : "Remove credentials"}
+            {publicSource ? "Desactivar fuente" : "Eliminar credenciales"}
           </Button>
         )}
       </div>

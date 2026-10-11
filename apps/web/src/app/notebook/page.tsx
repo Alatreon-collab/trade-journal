@@ -54,7 +54,7 @@ function Notebook() {
   const createNote = async () => {
     const result = await postJson<{ id: string }>("/api/notes", {
       folderId: folder === "all" ? "my-notes" : folder,
-      title: "Untitled",
+      title: "Sin título",
     });
     refresh();
     setSelectedId(result.id);
@@ -74,7 +74,7 @@ function Notebook() {
       setFolderName("");
     } catch (error) {
       setFolderError(
-        error instanceof Error ? error.message : "Could not create the folder. Try again.",
+        error instanceof Error ? error.message : "No se pudo crear la carpeta. Inténtalo de nuevo.",
       );
     } finally {
       setCreatingFolder(false);
@@ -85,8 +85,8 @@ function Notebook() {
     <div>
       <Dialog open={folderOpen} onOpenChange={(open) => !creatingFolder && setFolderOpen(open)}>
         <DialogContent>
-          <DialogTitle>New folder</DialogTitle>
-          <DialogDescription>Organize your notes in a named folder.</DialogDescription>
+          <DialogTitle>Carpeta nueva</DialogTitle>
+          <DialogDescription>Organiza tus notas en una carpeta con nombre.</DialogDescription>
           <form
             className="space-y-4"
             onSubmit={(event) => {
@@ -95,7 +95,7 @@ function Notebook() {
             }}
           >
             <label className="block space-y-2 text-sm">
-              <span>Folder name</span>
+              <span>Nombre de la carpeta</span>
               <Input
                 autoFocus
                 value={folderName}
@@ -120,21 +120,21 @@ function Notebook() {
                 disabled={creatingFolder}
                 onClick={() => setFolderOpen(false)}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button type="submit" disabled={creatingFolder || !folderName.trim()}>
-                {creatingFolder ? "Creating…" : "Create folder"}
+                {creatingFolder ? "Creando…" : "Crear carpeta"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
       <FilterBar
-        title="Notebook"
+        title="Cuaderno"
         actions={
           <Button size="sm" onClick={createNote}>
             <Plus />
-            New note
+            Nota nueva
           </Button>
         }
       />
@@ -149,7 +149,7 @@ function Notebook() {
             )}
             onClick={() => setFolder("all")}
           >
-            All notes
+            Todas las notas
           </button>
           {data?.folders
             .filter((f) => f.id !== "all")
@@ -177,7 +177,7 @@ function Notebook() {
             }}
           >
             <FolderPlus />
-            New folder
+            Carpeta nueva
           </Button>
         </div>
 
@@ -185,12 +185,12 @@ function Notebook() {
           <div className="sticky top-0 z-[1] space-y-2 border-b bg-background p-2">
             <div className="flex min-w-0 items-center gap-2 xl:hidden">
               <OptionSelect
-                aria-label="Note folder"
+                aria-label="Carpeta de notas"
                 value={folder}
                 onValueChange={(next) => setFolder(next)}
                 className="h-9 min-w-0 flex-1 rounded-lg border bg-card px-2 text-sm"
               >
-                <option value="all">All notes</option>
+                <option value="all">Todas las notas</option>
                 {data?.folders
                   .filter((item) => item.id !== "all")
                   .map((item) => (
@@ -203,7 +203,7 @@ function Notebook() {
                 variant="ghost"
                 size="icon"
                 className="h-9 w-9 shrink-0"
-                aria-label="New folder"
+                aria-label="Carpeta nueva"
                 onClick={() => {
                   setFolderError("");
                   setFolderOpen(true);
@@ -217,13 +217,13 @@ function Notebook() {
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search notes"
+                placeholder="Buscar notas"
                 className="pl-8"
               />
             </div>
           </div>
           {data?.notes.length === 0 && (
-            <p className="p-6 text-center text-sm text-muted-foreground">No notes here yet.</p>
+            <p className="p-6 text-center text-sm text-muted-foreground">Aún no hay notas aquí.</p>
           )}
           {data?.notes.map((note) => (
             <button
@@ -234,9 +234,9 @@ function Notebook() {
               )}
               onClick={() => setSelectedId(note.id)}
             >
-              <div className="truncate text-sm font-medium">{note.title || "Untitled"}</div>
+              <div className="truncate text-sm font-medium">{note.title || "Sin título"}</div>
               <div className="truncate text-xs text-muted-foreground">
-                {note.updatedAt.slice(0, 10)} · {note.content.slice(0, 60) || "empty"}
+                {note.updatedAt.slice(0, 10)} · {note.content.slice(0, 60) || "vacía"}
               </div>
             </button>
           ))}
@@ -252,14 +252,14 @@ function Notebook() {
               onClick={() => setSelectedId(null)}
             >
               <ArrowLeft />
-              Back to notes
+              Volver a las notas
             </Button>
           )}
           {selected ? (
             <NoteEditor key={selected.id} note={selected} onChanged={refresh} />
           ) : (
             <p className="py-24 text-center text-sm text-muted-foreground">
-              Select or create a note.
+              Elige o crea una nota.
             </p>
           )}
         </div>
@@ -291,7 +291,7 @@ function NoteEditor({ note, onChanged }: { note: NoteRow; onChanged: () => void 
               save(event.target.value, content);
             }}
             className="notebook-editor-title border-0 px-0 text-lg font-semibold shadow-none focus-visible:ring-0"
-            placeholder="Title"
+            placeholder="Título"
           />
           <Button
             type="button"
@@ -299,7 +299,7 @@ function NoteEditor({ note, onChanged }: { note: NoteRow; onChanged: () => void 
             size="sm"
             onClick={() => setMode(mode === "preview" ? "edit" : "preview")}
           >
-            {mode === "preview" ? "Edit" : "Preview"}
+            {mode === "preview" ? "Editar" : "Vista previa"}
           </Button>
           <VoiceNote
             onPrepare={() => editor.current?.focus()}
@@ -314,13 +314,13 @@ function NoteEditor({ note, onChanged }: { note: NoteRow; onChanged: () => void 
             size="sm"
             className="text-destructive"
             onClick={async () => {
-              if (confirm("Delete this note?")) {
+              if (confirm("¿Borrar esta nota?")) {
                 await postJson(`/api/notes/${note.id}`, undefined, "DELETE");
                 onChanged();
               }
             }}
           >
-            Delete
+            Borrar
           </Button>
         </div>
         <RichEditor
@@ -337,10 +337,10 @@ function NoteEditor({ note, onChanged }: { note: NoteRow; onChanged: () => void 
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span role="status">{status}</span>
           <Button variant="ghost" size="sm" onClick={() => void flush()}>
-            Save now
+            Guardar ahora
           </Button>
         </div>
-        <ReviewExport document={{ title: title || "Journal note", lines: [content] }} />
+        <ReviewExport document={{ title: title || "Nota del journal", lines: [content] }} />
         <Attachments type="note" id={note.id} />
       </CardContent>
     </Card>

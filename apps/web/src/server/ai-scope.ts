@@ -109,7 +109,7 @@ export function readAiRequest(value: unknown, field: "question" | "date") {
   const label = (privateMode: boolean) =>
     [
       date,
-      !ids ? "All accounts" : "",
+      !ids ? "Todas las cuentas" : "",
       describeFilters(filters, selectedAccounts, strategies, privateMode),
       timeZone,
     ]

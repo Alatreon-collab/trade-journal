@@ -81,7 +81,7 @@ it("defaults off and never sends a chosen file to AI until explicitly previewed 
   );
   await upload();
   expect(state.post).not.toHaveBeenCalled();
-  expect(button("Preview with AI").disabled).toBe(true);
+  expect(button("Vista previa con IA").disabled).toBe(true);
 });
 it("shows all extracted rows and requires review before committing the frozen preview", async () => {
   state.configured = true;
@@ -114,20 +114,20 @@ it("shows all extracted rows and requires review before committing the frozen pr
       to: "2026-09-01T10:00:00Z",
     },
   });
-  await act(async () => button("Preview with AI").click());
+  await act(async () => button("Vista previa con IA").click());
   expect(state.post.mock.calls[0]![1]).toMatchObject({
     mode: "preview",
     ai: { provider: "openai" },
   });
-  expect(container.textContent).toContain("2 @ 100 · Fees 0");
-  expect(container.textContent).toContain("Source: Row 1");
+  expect(container.textContent).toContain("2 @ 100 · Comisiones 0");
+  expect(container.textContent).toContain("Origen: Row 1");
   await act(async () => button("Choose test account").click());
-  expect(button("Import").disabled).toBe(true);
+  expect(button("Importar").disabled).toBe(true);
   const checkboxes = container.querySelectorAll<HTMLButtonElement>('button[role="checkbox"]');
   await act(async () => checkboxes[checkboxes.length - 1]!.click());
-  expect(button("Import").disabled).toBe(false);
+  expect(button("Importar").disabled).toBe(false);
   state.post.mockResolvedValueOnce({ inserted: 1, duplicates: 0 });
-  await act(async () => button("Import").click());
+  await act(async () => button("Importar").click());
   expect(state.post.mock.calls[1]![1]).toMatchObject({
     mode: "commit",
     aiPreviewToken: "opaque-token",

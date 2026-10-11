@@ -19,10 +19,10 @@ export function ImportReconciliation({
 }) {
   return (
     <div className="space-y-3 border-t pt-3">
-      <p className="text-sm font-medium">Review NinjaTrader import</p>
+      <p className="text-sm font-medium">Revisar importación de NinjaTrader</p>
       <p className="text-xs text-muted-foreground">
-        Keep each source account separate inside your selected journal account. Review the result
-        before saving.
+        Mantén separada cada cuenta de origen dentro de la cuenta del journal que has elegido.
+        Revisa el resultado antes de guardar.
       </p>
       {review && (
         <>
@@ -30,7 +30,7 @@ export function ImportReconciliation({
             <label key={source.key} className="block space-y-1 text-sm">
               <span>{source.label}</span>
               <select
-                aria-label={`Source mapping for ${source.label}`}
+                aria-label={`Cuenta de origen para ${source.label}`}
                 disabled={busy || source.saved}
                 className="block w-full rounded-md border bg-background p-2 text-sm"
                 value={options.sourceMappings?.[source.key] ?? source.selected ?? ""}
@@ -41,44 +41,44 @@ export function ImportReconciliation({
                   })
                 }
               >
-                <option value="">Choose the source this file belongs to</option>
+                <option value="">Elige la cuenta de origen de este archivo</option>
                 {review.savedSources.map((saved) => (
                   <option key={saved.id} value={saved.id}>
                     {saved.name}
                   </option>
                 ))}
-                <option value="new">Create a separate source account</option>
+                <option value="new">Crear una cuenta de origen aparte</option>
               </select>
             </label>
           ))}
           <p className="text-xs text-muted-foreground">
-            If an account or connection was renamed, select its existing source. Choose a new source
-            only for a genuinely different account.
+            Si una cuenta o conexión ha cambiado de nombre, elige su origen existente. Elige uno
+            nuevo solo si de verdad es otra cuenta.
           </p>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm" role="status">
-            <span>{review.inserted} new fills</span>
-            <span>{review.duplicates} duplicate fills</span>
-            <span>{review.corrections.length} fee corrections</span>
+            <span>{review.inserted} ejecuciones nuevas</span>
+            <span>{review.duplicates} ejecuciones duplicadas</span>
+            <span>{review.corrections.length} comisiones corregidas</span>
           </div>
           {review.multipliers.map((item) => (
             <p key={item.symbol} className="text-xs">
-              {item.symbol} multiplier: {item.value ?? "missing — configure in Settings"}
+              Multiplicador de {item.symbol}: {item.value ?? "falta, configúralo en Ajustes"}
             </p>
           ))}
           {review.multipliers.some((item) => item.value === null) && (
             <a className="text-sm underline" href="/settings" target="_blank" rel="noreferrer">
-              Open Settings, then review again
+              Abre Ajustes y vuelve a revisar
             </a>
           )}
           {review.totals && (
             <div className="rounded-md bg-muted/40 p-3 text-sm">
-              <p className="font-medium">Destination account after import ({review.currency})</p>
+              <p className="font-medium">Cuenta de destino tras importar ({review.currency})</p>
               <p>
-                {review.totals.closedTrades} closed trades · {review.totals.openTrades} open trades
+                {review.totals.closedTrades} trades cerrados · {review.totals.openTrades} abiertos
               </p>
               <p>
-                Closed-trade net P&amp;L: {fmtMoney(review.totals.netPnl, review.currency)} · Fees:{" "}
-                {fmtMoney(review.totals.fees, review.currency)}
+                P&amp;L neto de trades cerrados: {fmtMoney(review.totals.netPnl, review.currency)} ·
+                Comisiones: {fmtMoney(review.totals.fees, review.currency)}
               </p>
             </div>
           )}
@@ -93,8 +93,8 @@ export function ImportReconciliation({
                 }
               />
               <span>
-                This export includes every execution for each listed source contract between its
-                first and last timestamp. It is not a partial selection of repeated fills.
+                Esta exportación incluye todas las ejecuciones de cada contrato listado entre su
+                primera y su última hora. No es una selección parcial de ejecuciones repetidas.
               </span>
             </label>
           )}
@@ -102,14 +102,14 @@ export function ImportReconciliation({
             <div className="space-y-2">
               {review.corrections.slice(0, 10).map((correction, index) => (
                 <p key={index} className="text-xs">
-                  {correction.symbol} · {correction.executedAt}: commission{" "}
+                  {correction.symbol} · {correction.executedAt}: comisión{" "}
                   {fmtMoney(correction.oldFee, review.currency)} →{" "}
                   {fmtMoney(correction.newFee, review.currency)}
                 </p>
               ))}
               {review.corrections.length > 10 && (
                 <p className="text-xs">
-                  Plus {review.corrections.length - 10} more fee corrections.
+                  Y {review.corrections.length - 10} correcciones de comisión más.
                 </p>
               )}
               <label className="flex items-start gap-2 text-sm">
@@ -122,8 +122,8 @@ export function ImportReconciliation({
                   }
                 />
                 <span>
-                  Apply these commission corrections to the existing executions and recalculate
-                  P&amp;L.
+                  Aplicar estas correcciones de comisión a las ejecuciones existentes y recalcular
+                  el P&amp;L.
                 </span>
               </label>
             </div>
@@ -141,12 +141,12 @@ export function ImportReconciliation({
         </>
       )}
       <Button variant="outline" disabled={busy} onClick={onReview}>
-        {busy ? "Reviewing…" : "Review import"}
+        {busy ? "Revisando…" : "Revisar importación"}
       </Button>
       {review?.token && (
         <p className="text-xs text-muted-foreground">
-          Review complete. Import will save this result; if the file, settings or journal changes,
-          another review is required.
+          Revisión completada. Al importar se guardará este resultado; si cambian el archivo, los
+          ajustes o el journal, habrá que revisar otra vez.
         </p>
       )}
     </div>

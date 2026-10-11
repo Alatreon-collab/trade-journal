@@ -24,15 +24,15 @@ export function useAutosave(url: string, method: "PATCH" | "PUT" = "PATCH", onSa
             keepalive: JSON.stringify(body).length < 50000,
           });
           const result = await response.json();
-          if (!response.ok) throw new Error(result.error ?? "Save failed");
+          if (!response.ok) throw new Error(result.error ?? "Error al guardar");
           if (mounted.current) {
-            setStatus(Object.keys(pending.current).length ? "Saving…" : "Saved");
+            setStatus(Object.keys(pending.current).length ? "Guardando…" : "Guardado");
             callback.current?.();
           }
         } catch (e) {
           pending.current = { ...body, ...pending.current };
           if (mounted.current)
-            setStatus(`Not saved: ${e instanceof Error ? e.message : "Connection failed"}`);
+            setStatus(`No guardado: ${e instanceof Error ? e.message : "Fallo de conexión"}`);
           break;
         }
       }
@@ -60,7 +60,7 @@ export function useAutosave(url: string, method: "PATCH" | "PUT" = "PATCH", onSa
   const save = useCallback(
     (body: Record<string, unknown>) => {
       pending.current = { ...pending.current, ...body };
-      setStatus("Saving…");
+      setStatus("Guardando…");
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => void flush(), 500);
     },

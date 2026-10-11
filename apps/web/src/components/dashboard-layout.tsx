@@ -150,7 +150,9 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
           const next = { current: normalizeArrangement(null, ids), layouts: {} };
           stateRef.current = next;
           setState(next);
-          setError("Saved dashboard preferences could not be read. All cards are shown.");
+          setError(
+            "No se pudieron leer las preferencias guardadas del dashboard. Se muestran todas las tarjetas.",
+          );
         }
         setReady(true);
       });
@@ -165,7 +167,7 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
 
   function update(
     change: (previous: DashboardPreferences) => DashboardPreferences,
-    message = "Layout saved",
+    message = "Diseño guardado",
   ) {
     const next = change(stateRef.current);
     captureLayout();
@@ -178,7 +180,7 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
       return true;
     } catch {
       setFeedback("");
-      setError("Your layout changed, but could not be saved in this browser.");
+      setError("Tu diseño ha cambiado, pero no se pudo guardar en este navegador.");
       return false;
     }
   }
@@ -210,7 +212,7 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
     wide: 10,
     full: 15,
   });
-  const label = (id: string | number) => byId.get(String(id))?.label ?? "Card";
+  const label = (id: string | number) => byId.get(String(id))?.label ?? "Tarjeta";
 
   function startDrag({ active, activatorEvent }: DragStartEvent) {
     const card = Array.from(gridRef.current?.children ?? []).find(
@@ -278,12 +280,12 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
         ...previous,
         current: { ...normalizeArrangement(previous.current, ids), hidden: [] },
       }),
-      "All cards are shown. Layout saved.",
+      "Se muestran todas las tarjetas. Diseño guardado.",
     );
   }
 
   if (!ready)
-    return <div className="p-4 text-sm text-muted-foreground">Loading dashboard layout…</div>;
+    return <div className="p-4 text-sm text-muted-foreground">Cargando diseño del dashboard…</div>;
 
   return (
     <div className="space-y-3 p-4">
@@ -299,7 +301,7 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
                   ...previous,
                   current: normalizeArrangement(arrangement, ids),
                 }),
-                `${name} loaded`,
+                `${name} cargado`,
               )
             }
             onSave={(name) =>
@@ -311,12 +313,12 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
                     [name]: normalizeArrangement(previous.current, ids),
                   },
                 }),
-                `${name} saved`,
+                `${name} guardado`,
               )
             }
           />
           <span className="text-xs text-muted-foreground">
-            {visible.length} of {widgets.length} cards
+            {visible.length} de {widgets.length} tarjetas
           </span>
           <span role="status" className="sr-only">
             {feedback}
@@ -345,7 +347,7 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
           onRestore={() =>
             update(
               (previous) => ({ ...previous, current: initial }),
-              "Original card order restored. All cards are shown.",
+              "Orden original restaurado. Se muestran todas las tarjetas.",
             )
           }
         />
@@ -353,10 +355,11 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
       {hiddenCount > 0 && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm">
           <span>
-            {hiddenCount} {hiddenCount === 1 ? "card is" : "cards are"} hidden in this layout.
+            {hiddenCount} {hiddenCount === 1 ? "tarjeta oculta" : "tarjetas ocultas"} en este
+            diseño.
           </span>
           <Button type="button" size="sm" variant="outline" onClick={showAll}>
-            Show all cards
+            Mostrar todas
           </Button>
         </div>
       )}
@@ -367,7 +370,7 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
       )}
       {visible.length === 0 && (
         <p className="py-8 text-center text-sm text-muted-foreground">
-          All cards are hidden. Choose Show all cards to restore them.
+          Todas las tarjetas están ocultas. Pulsa «Mostrar todas» para recuperarlas.
         </p>
       )}
       <DndContext
@@ -389,19 +392,19 @@ export function DashboardLayout({ widgets }: { widgets: Widget[] }) {
         accessibility={{
           screenReaderInstructions: {
             draggable:
-              "Press Space or Enter to pick up a card. Use the arrow keys to move, then Space or Enter to drop. Press Escape to cancel.",
+              "Pulsa Espacio o Intro para coger una tarjeta. Muévela con las flechas y suéltala con Espacio o Intro. Pulsa Escape para cancelar.",
           },
           announcements: {
-            onDragStart: ({ active }) => `Picked up ${label(active.id)}.`,
+            onDragStart: ({ active }) => `Has cogido ${label(active.id)}.`,
             onDragOver: ({ active, over }) =>
               over
-                ? `${label(active.id)} is over ${label(over.id)}.`
-                : "Outside the cards. Drop here to cancel.",
+                ? `${label(active.id)} está sobre ${label(over.id)}.`
+                : "Fuera de las tarjetas. Suelta aquí para cancelar.",
             onDragEnd: ({ active, over }) =>
               over
-                ? `${label(active.id)} placed at position ${visible.indexOf(String(active.id)) + 1} of ${visible.length}.`
-                : "Move cancelled.",
-            onDragCancel: () => "Move cancelled. Layout unchanged.",
+                ? `${label(active.id)} colocada en la posición ${visible.indexOf(String(active.id)) + 1} de ${visible.length}.`
+                : "Movimiento cancelado.",
+            onDragCancel: () => "Movimiento cancelado. El diseño no cambia.",
           },
         }}
       >
@@ -481,7 +484,7 @@ function SortableCard({
           variant="ghost"
           {...attributes}
           {...listeners}
-          aria-label={`Rearrange ${widget.label}`}
+          aria-label={`Mover ${widget.label}`}
           title={`Drag to rearrange ${widget.label}`}
           className="absolute left-1.5 top-3 z-[1] h-6 w-5 touch-none cursor-grab text-muted-foreground/60 hover:text-foreground active:cursor-grabbing"
         >

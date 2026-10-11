@@ -32,24 +32,18 @@ export function calendarInsights(calendar: CalendarMonth) {
   const losses = days.reduce((sum, d) => sum + d.losses, 0);
   const breakevens = days.reduce((sum, d) => sum + d.breakevens, 0);
   const netPnl = days.reduce((sum, d) => sum + d.netPnl, 0);
-  const weekdays = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ].map((label, index) => {
-    const matching = days.filter((day) => closingWeekday(day.date) === index);
-    return {
-      index,
-      label,
-      days: matching,
-      trades: matching.reduce((sum, d) => sum + d.trades, 0),
-      netPnl: matching.reduce((sum, d) => sum + d.netPnl, 0),
-    };
-  });
+  const weekdays = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"].map(
+    (label, index) => {
+      const matching = days.filter((day) => closingWeekday(day.date) === index);
+      return {
+        index,
+        label,
+        days: matching,
+        trades: matching.reduce((sum, d) => sum + d.trades, 0),
+        netPnl: matching.reduce((sum, d) => sum + d.netPnl, 0),
+      };
+    },
+  );
   const profitableWeekdays = weekdays
     .filter((d) => d.netPnl > 0)
     .sort((a, b) => b.netPnl - a.netPnl || a.index - b.index);

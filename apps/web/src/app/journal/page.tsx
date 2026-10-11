@@ -22,7 +22,7 @@ interface JournalDay {
 }
 
 const PAGE_SIZE = 50;
-const weekdayFormatter = new Intl.DateTimeFormat("en-US", {
+const weekdayFormatter = new Intl.DateTimeFormat("es-ES", {
   weekday: "long",
   timeZone: "UTC",
 });
@@ -47,13 +47,13 @@ function Journal() {
   return (
     <div>
       <FilterBar
-        title="Daily journal"
+        title="Diario"
         actions={
           <Link
             href={`/journal/${dayKeyOf(new Date().toISOString(), timeZone)}?${query}`}
             className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
           >
-            View my day
+            Ver mi día
           </Link>
         }
       />
@@ -62,17 +62,17 @@ function Journal() {
           <div role="alert" className="space-y-2 text-sm text-destructive">
             <p>{error}</p>
             <Button variant="outline" onClick={refresh}>
-              Try again
+              Reintentar
             </Button>
           </div>
         ) : !data ? (
-          <div role="status" aria-label="Loading journal">
+          <div role="status" aria-label="Cargando diario">
             <Skeleton className="h-48" />
           </div>
         ) : null}
         {data?.days.length === 0 && (
           <p className="py-16 text-center text-sm text-muted-foreground">
-            No trading days yet — import trades or write your first day note.
+            Aún no hay días operados: importa trades o escribe tu primera nota del día.
           </p>
         )}
         {data?.days.slice(0, limit).map((day) => (
@@ -96,19 +96,19 @@ function Journal() {
                         day.stats.trades > 0 ? day.stats.wins / day.stats.trades : null,
                         0,
                       )}{" "}
-                      win
+                      winrate
                     </span>
                     <span className="text-muted-foreground">
                       {day.stats.wins}W / {day.stats.losses}L
                     </span>
                   </div>
                 ) : (
-                  <div className="flex-1 text-sm text-muted-foreground">No trades</div>
+                  <div className="flex-1 text-sm text-muted-foreground">Sin trades</div>
                 )}
                 {day.hasNote && (
                   <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <NotebookPen className="h-3.5 w-3.5" />
-                    note
+                    nota
                   </span>
                 )}
               </CardContent>
@@ -118,7 +118,7 @@ function Journal() {
         {data && data.days.length > PAGE_SIZE && (
           <div className="flex flex-wrap items-center justify-between gap-3 py-2 text-xs text-muted-foreground">
             <span role="status">
-              Showing {Math.min(limit, data.days.length)} of {data.days.length} days
+              Mostrando {Math.min(limit, data.days.length)} de {data.days.length} días
             </span>
             {limit < data.days.length && (
               <Button
@@ -126,7 +126,7 @@ function Journal() {
                 size="sm"
                 onClick={() => setVisibleWindow({ query, limit: limit + PAGE_SIZE })}
               >
-                Show older days
+                Ver días anteriores
               </Button>
             )}
           </div>

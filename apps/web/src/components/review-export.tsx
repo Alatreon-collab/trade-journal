@@ -47,7 +47,7 @@ export function ReviewExport({
       setPreviewDocument(document);
       setOpen(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Export failed.");
+      setError(e instanceof Error ? e.message : "Falló la exportación.");
     } finally {
       setBusy(false);
     }
@@ -63,7 +63,7 @@ export function ReviewExport({
           onClick={() => void run(false)}
         >
           <Download />
-          Export PDF
+          Exportar PDF
         </Button>
         <Button
           type="button"
@@ -73,12 +73,12 @@ export function ReviewExport({
           onClick={() => void run(true)}
         >
           <ImageIcon />
-          Export PNG
+          Exportar PNG
         </Button>
       </div>
       {concealed && (
         <p className="text-xs text-muted-foreground">
-          Turn off privacy mode to export financial figures.
+          Desactiva el modo privado para exportar cifras financieras.
         </p>
       )}
       {error && (
@@ -89,13 +89,13 @@ export function ReviewExport({
       <Dialog open={open && !concealed} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Review export</DialogTitle>
+            <DialogTitle>Exportar revisión</DialogTitle>
           </DialogHeader>
           {files.map((f, i) => (
             <div key={f.url} className="space-y-3">
               <Button asChild size="sm">
                 <a href={f.url} download={f.filename}>
-                  Download {f.type === "application/pdf" ? "PDF" : "PNG"}
+                  Descargar {f.type === "application/pdf" ? "PDF" : "PNG"}
                   {files.length > 1 ? ` · ${i + 1}/${files.length}` : ""}
                 </a>
               </Button>

@@ -1,11 +1,14 @@
 "use client";
 
 import { DayPicker, type DayPickerProps } from "react-day-picker";
+import { es } from "react-day-picker/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function Calendar(props: DayPickerProps) {
   return (
     <DayPicker
+      locale={es}
+      weekStartsOn={1}
       showOutsideDays
       fixedWeeks
       className="journal-date-calendar"

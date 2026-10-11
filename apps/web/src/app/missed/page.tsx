@@ -103,23 +103,23 @@ function Missed() {
   return (
     <div>
       <FilterBar
-        title="Missed trades"
+        title="Trades perdidos"
         actions={
           <Button size="sm" onClick={() => edit()}>
-            Log opportunity
+            Registrar oportunidad
           </Button>
         }
       />
       <div className="space-y-4 p-4">
         <p className="text-sm text-muted-foreground">
-          Record setups you watched but did not take. These observations never enter your trade
-          count, P&L, or win rate.
+          Apunta los setups que viste pero no entraste. Estas observaciones nunca cuentan en tu
+          número de trades, tu P&L ni tu winrate.
         </p>
         <div className="flex flex-wrap items-center gap-4">
           <input
-            aria-label="Search missed trades"
+            aria-label="Buscar trades perdidos"
             className={`${fieldClass} max-w-sm`}
-            placeholder="Search symbol or notes"
+            placeholder="Buscar símbolo o notas"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -128,7 +128,7 @@ function Missed() {
               checked={archived}
               onCheckedChange={(checked) => setArchived(checked === true)}
             />
-            Show archived
+            Mostrar archivados
           </label>
         </div>
         {(error || failure) && (
@@ -146,7 +146,7 @@ function Missed() {
                   </CardTitle>
                   <div className="flex gap-2">
                     <Button variant="ghost" size="sm" onClick={() => edit(t)}>
-                      Edit
+                      Editar
                     </Button>
                     <Button
                       variant="ghost"
@@ -164,21 +164,21 @@ function Missed() {
                         }
                       }}
                     >
-                      {t.archivedAt ? "Restore" : "Archive"}
+                      {t.archivedAt ? "Restaurar" : "Archivar"}
                     </Button>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(t.observedAt).toLocaleString()} ·{" "}
-                  {books?.playbooks.find((b) => b.id === t.playbookId)?.name ?? "No strategy"}
+                  {new Date(t.observedAt).toLocaleString("es-ES")} ·{" "}
+                  {books?.playbooks.find((b) => b.id === t.playbookId)?.name ?? "Sin estrategia"}
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-wrap gap-5 text-sm">
                   {[
-                    ["Entry", t.entry],
+                    ["Entrada", t.entry],
                     ["Stop", t.stop],
-                    ["Target", t.target],
+                    ["Objetivo", t.target],
                   ].map(([label, value]) => (
                     <span key={label}>
                       <span className="text-muted-foreground">{label}: </span>
@@ -186,15 +186,15 @@ function Missed() {
                     </span>
                   ))}
                 </div>
-                <Markdown>{t.notes || "No review yet."}</Markdown>
+                <Markdown>{t.notes || "Aún sin revisión."}</Markdown>
                 <ReviewExport
                   containsFinancialData
                   document={{
-                    title: `Missed opportunity · ${t.symbol}`,
+                    title: `Oportunidad perdida · ${t.symbol}`,
                     subtitle: `${t.direction} · ${t.observedAt}`,
                     lines: [
-                      "Observation only: no executed trade or actual P&L.",
-                      `Planned entry: ${t.entry ?? "-"} | Stop: ${t.stop ?? "-"} | Target: ${t.target ?? "-"}`,
+                      "Solo observación: no hay trade ejecutado ni P&L real.",
+                      `Entrada planificada: ${t.entry ?? "-"} | Stop: ${t.stop ?? "-"} | Objetivo: ${t.target ?? "-"}`,
                       "",
                       t.notes,
                     ],
@@ -207,17 +207,19 @@ function Missed() {
         </div>
         {data && !rows.length && (
           <p className="py-16 text-center text-sm text-muted-foreground">
-            No {archived ? "archived " : ""}opportunities here yet.
+            Aún no hay oportunidades{archived ? " archivadas" : ""} aquí.
           </p>
         )}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editing ? "Edit opportunity" : "Log a missed opportunity"}</DialogTitle>
+              <DialogTitle>
+                {editing ? "Editar oportunidad" : "Registrar una oportunidad perdida"}
+              </DialogTitle>
             </DialogHeader>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {formField("symbol", "Symbol")}
-              <Field label="Direction">
+              {formField("symbol", "Símbolo")}
+              <Field label="Dirección">
                 <OptionSelect
                   className={fieldClass}
                   value={draft.direction}
@@ -227,14 +229,14 @@ function Missed() {
                   <option value="short">Short</option>
                 </OptionSelect>
               </Field>
-              {formField("observedAt", "Observed at (device time)", "datetime-local")}
-              <Field label="Strategy">
+              {formField("observedAt", "Vista a las (hora del dispositivo)", "datetime-local")}
+              <Field label="Estrategia">
                 <OptionSelect
                   className={fieldClass}
                   value={draft.playbookId}
                   onValueChange={(next) => setDraft({ ...draft, playbookId: next })}
                 >
-                  <option value="">No strategy</option>
+                  <option value="">Sin estrategia</option>
                   {books?.playbooks.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.name}
@@ -244,15 +246,15 @@ function Missed() {
               </Field>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {formField("entry", "Planned entry", "number")}
-              {formField("stop", "Planned stop", "number")}
-              {formField("target", "Planned target", "number")}
+              {formField("entry", "Entrada planificada", "number")}
+              {formField("stop", "Stop planificado", "number")}
+              {formField("target", "Objetivo planificado", "number")}
             </div>
             <RichEditor
               defaultMode="edit"
               value={draft.notes}
               onChange={(notes) => setDraft({ ...draft, notes })}
-              placeholder="Why did you miss it? What will you do differently?"
+              placeholder="¿Por qué no entraste? ¿Qué harás distinto la próxima vez?"
             />
             {failure && (
               <p role="alert" className="text-xs text-destructive">
@@ -276,13 +278,13 @@ function Missed() {
                   refresh();
                   setFailure("");
                 } catch (e) {
-                  setFailure(e instanceof Error ? e.message : "Could not save.");
+                  setFailure(e instanceof Error ? e.message : "No se pudo guardar.");
                 } finally {
                   setBusy(false);
                 }
               }}
             >
-              Save opportunity
+              Guardar oportunidad
             </Button>
           </DialogContent>
         </Dialog>

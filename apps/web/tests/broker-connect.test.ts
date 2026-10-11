@@ -100,7 +100,7 @@ const fill = async (broker: (typeof brokers)[number]) =>
   });
 const connectButton = () =>
   [...container.querySelectorAll("button")].find(
-    (button) => button.textContent === "Connect & sync",
+    (button) => button.textContent === "Conectar y sincronizar",
   )!;
 
 it("exposes exactly the 22 public brokers including the six added integrations", () => {
@@ -151,7 +151,7 @@ it.each(brokers)(
 it("shows the effective IBKR timezone, reports skipped fills and surfaces connection failures", async () => {
   await choose("ibkr-flex");
   await fill(brokers.find((broker) => broker.id === "ibkr-flex")!);
-  expect(container.textContent).toContain("Statement timezone: America/New_York");
+  expect(container.textContent).toContain("Zona horaria del extracto: America/New_York");
   state.post.mockRejectedValueOnce(new Error("IBKR rejected test credentials"));
   await act(async () => connectButton().click());
   expect(container.textContent).toContain("IBKR rejected test credentials");
@@ -161,13 +161,15 @@ it("shows the effective IBKR timezone, reports skipped fills and surfaces connec
     sync: { skipped: 2, skippedReasons: ["Ambiguous daylight-saving times"] },
   });
   await act(async () => connectButton().click());
-  expect(alert).toHaveBeenCalledWith(expect.stringContaining("2 broker record(s) were skipped"));
+  expect(alert).toHaveBeenCalledWith(
+    expect.stringContaining("Se omitieron 2 registro(s) del bróker"),
+  );
   expect(state.push).toHaveBeenCalledWith("/?accounts=corrected");
 });
 it("blocks IBKR connection when its effective timezone cannot be loaded", async () => {
   state.settingsError = "Unavailable";
   await choose("ibkr-flex");
   await fill(brokers.find((broker) => broker.id === "ibkr-flex")!);
-  expect(container.textContent).toContain("Could not load the import timezone");
+  expect(container.textContent).toContain("No se pudo cargar la zona horaria de importación");
   expect(connectButton().disabled).toBe(true);
 });

@@ -94,7 +94,7 @@ export function TimeHeatmap({
         {
           type: "value",
           gridIndex: 0,
-          name: privateMode ? "Net P&L (hidden)" : `Net P&L (${currency})`,
+          name: privateMode ? "P&L neto (oculto)" : `P&L neto (${currency})`,
           nameTextStyle: { color: t.inkMuted, fontSize: 11 },
           splitLine: { lineStyle: { color: t.gridline } },
           axisLabel: {
@@ -115,9 +115,9 @@ export function TimeHeatmap({
       series: [
         {
           type: "bar",
-          name: "Net P&L",
+          name: "P&L neto",
           tooltip: {
-            valueFormatter: (value) => (privateMode ? "Hidden" : fmtMoney(Number(value), currency)),
+            valueFormatter: (value) => (privateMode ? "Oculto" : fmtMoney(Number(value), currency)),
           },
           xAxisIndex: 0,
           yAxisIndex: 0,

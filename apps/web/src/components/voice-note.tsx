@@ -41,7 +41,7 @@ export function VoiceNote({
     const Constructor = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
     if (!Constructor) {
       showError(
-        "This browser does not support speech recognition. Open the journal in Chrome, or use keyboard dictation below.",
+        "Este navegador no admite el reconocimiento de voz. Abre el journal en Chrome o usa el dictado del teclado (abajo).",
       );
       return;
     }
@@ -53,7 +53,7 @@ export function VoiceNote({
           onState: setState,
           onError: showError,
         },
-        navigator.language || "en-US",
+        navigator.language || "es-ES",
       );
       session.current.start();
     } catch {
@@ -76,19 +76,19 @@ export function VoiceNote({
             size="sm"
             onClick={toggle}
             aria-pressed={state !== "idle"}
-            title={state === "idle" ? "Dictate your note" : "Stop dictation"}
+            title={state === "idle" ? "Dictar la nota" : "Parar el dictado"}
           >
             {state === "idle" ? <Mic /> : <MicOff />}
             {state === "starting"
-              ? "Starting…"
+              ? "Iniciando…"
               : state === "listening"
-                ? "Listening · Stop"
-                : "Dictate"}
+                ? "Escuchando · Parar"
+                : "Dictar"}
           </Button>
         </Popover.Anchor>
         <Popover.Portal>
           <Popover.Content
-            aria-label="Dictation help"
+            aria-label="Ayuda del dictado"
             align="end"
             sideOffset={8}
             collisionPadding={12}
@@ -102,9 +102,8 @@ export function VoiceNote({
           >
             <p role="alert">{error}</p>
             <p className="text-muted-foreground">
-              Keyboard dictation types directly into your note. Use your keyboard’s microphone key
-              or your system’s dictation shortcut. On Mac, enable Dictation in System Settings →
-              Keyboard.
+              El dictado del teclado escribe directamente en tu nota. Usa la tecla de micrófono del
+              teclado o el atajo de dictado de tu sistema (en Windows, Win + H).
             </p>
             <div className="flex flex-wrap gap-2">
               <Button
@@ -117,17 +116,17 @@ export function VoiceNote({
                   onPrepare();
                 }}
               >
-                Use keyboard dictation
+                Usar dictado del teclado
               </Button>
               <Button type="button" size="sm" variant="ghost" onClick={() => setError("")}>
-                Dismiss
+                Cerrar
               </Button>
             </div>
           </Popover.Content>
         </Popover.Portal>
         {keyboardHint && (
           <span role="status" className="sr-only">
-            Note ready. Press your keyboard’s microphone key or dictation shortcut to speak.
+            Nota lista. Pulsa la tecla de micrófono o el atajo de dictado para hablar.
           </span>
         )}
       </div>

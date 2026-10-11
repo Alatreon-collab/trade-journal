@@ -57,7 +57,7 @@ export function AiNotice({
             className="mt-3 h-8 text-xs"
             onClick={onRetry}
           >
-            Try again
+            Reintentar
           </Button>
         ) : null}
       </div>
@@ -66,7 +66,7 @@ export function AiNotice({
         variant="ghost"
         size="icon"
         className="-mr-1 -mt-1 h-7 w-7 shrink-0 text-muted-foreground"
-        aria-label="Dismiss AI notice"
+        aria-label="Cerrar aviso de la IA"
         onClick={onDismiss}
       >
         <X className="h-3.5 w-3.5" />

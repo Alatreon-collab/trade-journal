@@ -73,7 +73,7 @@ describe("calendar performance calculations", () => {
     expect(i.worstDay?.date).toBe("2026-09-02");
     expect(i.weekdays.reduce((sum, bucket) => sum + bucket.netPnl, 0)).toBe(i.netPnl);
     expect(i.weekdays.reduce((sum, bucket) => sum + bucket.trades, 0)).toBe(i.trades);
-    expect(i.mostProfitableWeekday?.label).toBe("Tuesday");
+    expect(i.mostProfitableWeekday?.label).toBe("Martes");
     expect(i.trend.map((d) => d.average)).toEqual([null, null, null, null, 20, 2, 14, 20]);
   });
   it("does not pad trading-day averages with no-trade days or other months", () => {
@@ -189,7 +189,7 @@ describe("calendar scope and drill-down", () => {
     expect(calendarRunningPnl(ny, "America/New_York")["2026-08-31"]?.at(-1)?.cumNetPnl).toBe(
       i.netPnl,
     );
-    expect(i.mostProfitableWeekday?.label).toBe("Monday");
+    expect(i.mostProfitableWeekday?.label).toBe("Lunes");
     expect(
       calendarInsights(
         calendarMonthFromDays(

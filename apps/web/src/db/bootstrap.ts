@@ -144,11 +144,11 @@ CREATE INDEX IF NOT EXISTS progress_checks_date ON progress_checks(date);
 CREATE TABLE IF NOT EXISTS missed_trades (id TEXT PRIMARY KEY, symbol TEXT NOT NULL, direction TEXT NOT NULL, observed_at TEXT NOT NULL, playbook_id TEXT, entry REAL, stop REAL, target REAL, notes TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, archived_at TEXT);
 
 INSERT OR IGNORE INTO folders (id, name, kind, created_at) VALUES
-  ('all', 'All notes', 'system', '2026-01-01T00:00:00Z'),
-  ('trade-notes', 'Trade notes', 'system', '2026-01-01T00:00:00Z'),
-  ('daily-journal', 'Daily journal', 'system', '2026-01-01T00:00:00Z'),
-  ('session-recaps', 'Session recaps', 'system', '2026-01-01T00:00:00Z'),
-  ('my-notes', 'My notes', 'system', '2026-01-01T00:00:00Z');
+  ('all', 'Todas las notas', 'system', '2026-01-01T00:00:00Z'),
+  ('trade-notes', 'Notas de trades', 'system', '2026-01-01T00:00:00Z'),
+  ('daily-journal', 'Diario', 'system', '2026-01-01T00:00:00Z'),
+  ('session-recaps', 'Resúmenes de sesión', 'system', '2026-01-01T00:00:00Z'),
+  ('my-notes', 'Mis notas', 'system', '2026-01-01T00:00:00Z');
 
 CREATE TABLE IF NOT EXISTS prop_accounts (
  id TEXT PRIMARY KEY, firm TEXT NOT NULL, name TEXT NOT NULL, program TEXT NOT NULL,

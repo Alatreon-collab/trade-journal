@@ -98,7 +98,7 @@ function Trades() {
                   : false
             }
             onCheckedChange={(value) => table.toggleAllRowsSelected(value === true)}
-            aria-label="Select all matching trades"
+            aria-label="Seleccionar todos los trades"
           />
         ),
         cell: ({ row }) => (
@@ -106,24 +106,24 @@ function Trades() {
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(value === true)}
             onClick={(event) => event.stopPropagation()}
-            aria-label="Select trade"
+            aria-label="Seleccionar trade"
           />
         ),
       },
       {
         id: "closedAt",
         accessorKey: "closedAt",
-        header: "Close date",
+        header: "Fecha cierre",
         cell: ({ getValue }) => (
           <span className="text-muted-foreground">
-            {getValue<string | null>() ? dayKeyOf(getValue<string>(), timeZone) : "open"}
+            {getValue<string | null>() ? dayKeyOf(getValue<string>(), timeZone) : "abierto"}
           </span>
         ),
       },
       {
         id: "symbol",
         accessorKey: "symbol",
-        header: "Symbol",
+        header: "Símbolo",
         cell: ({ row, getValue }) => (
           <span className="flex items-center gap-2 font-medium">
             {getValue<string>()}
@@ -134,7 +134,7 @@ function Trades() {
       {
         id: "status",
         accessorKey: "status",
-        header: "Status",
+        header: "Resultado",
         cell: ({ getValue }) => {
           const status = getValue<string>();
           return (
@@ -147,13 +147,13 @@ function Trades() {
       {
         id: "quantity",
         accessorKey: "quantity",
-        header: "Volume",
+        header: "Volumen",
         cell: ({ getValue }) => <span className="tnum">{fmtNumber(getValue<number>(), 4)}</span>,
       },
       {
         id: "avgEntry",
         accessorKey: "avgEntry",
-        header: "Entry",
+        header: "Entrada",
         cell: ({ getValue }) => (
           <span className="tnum">
             <MonetaryValue>{fmtNumber(getValue<number>())}</MonetaryValue>
@@ -163,7 +163,7 @@ function Trades() {
       {
         id: "avgExit",
         accessorKey: "avgExit",
-        header: "Exit",
+        header: "Salida",
         cell: ({ getValue }) => (
           <span className="tnum">
             <MonetaryValue>
@@ -175,20 +175,20 @@ function Trades() {
       {
         id: "netPnl",
         accessorKey: "netPnl",
-        header: "Net P&L",
+        header: "P&L neto",
         cell: ({ getValue }) => <Pnl value={getValue<number>()} />,
       },
       {
         id: "roi",
         accessorFn: (row) =>
           row.avgEntry * row.quantity > 0 ? row.netPnl / (row.avgEntry * row.quantity) : 0,
-        header: "Net ROI",
+        header: "ROI neto",
         cell: ({ getValue }) => <span className="tnum">{fmtPercent(getValue<number>(), 2)}</span>,
       },
       {
         id: "fees",
         accessorKey: "fees",
-        header: "Fees",
+        header: "Comisiones",
         cell: ({ getValue }) => (
           <span className="tnum text-muted-foreground">
             <MonetaryValue>{fmtMoney(getValue<number>())}</MonetaryValue>
@@ -198,7 +198,7 @@ function Trades() {
       {
         id: "durationMs",
         accessorKey: "durationMs",
-        header: "Duration",
+        header: "Duración",
         cell: ({ getValue }) => (
           <span className="text-muted-foreground">{fmtDuration(getValue<number | null>())}</span>
         ),
@@ -206,7 +206,7 @@ function Trades() {
       {
         id: "executionCount",
         accessorKey: "executionCount",
-        header: "Execs",
+        header: "Ejecuciones",
         cell: ({ getValue }) => (
           <span className="tnum text-muted-foreground">{getValue<number>()}</span>
         ),
@@ -215,7 +215,7 @@ function Trades() {
         id: "tags",
         accessorKey: "tags",
         enableSorting: false,
-        header: "Tags",
+        header: "Etiquetas",
         cell: ({ getValue }) => (
           <span className="flex max-w-40 flex-wrap gap-1">
             {getValue<string[]>().map((tag) => (
@@ -229,7 +229,7 @@ function Trades() {
       {
         id: "rating",
         accessorKey: "rating",
-        header: "Rating",
+        header: "Valoración",
         cell: ({ getValue }) => {
           const rating = getValue<number | null>();
           return (
@@ -242,7 +242,7 @@ function Trades() {
       {
         id: "reviewed",
         accessorKey: "reviewed",
-        header: "Reviewed",
+        header: "Revisado",
         cell: ({ getValue }) =>
           getValue<boolean>() ? (
             <Check className="h-4 w-4 text-profit" />
@@ -291,7 +291,7 @@ function Trades() {
             </a>
             <Button variant="outline" size="sm" onClick={() => setShowColumns((value) => !value)}>
               <Columns3 />
-              Columns
+              Columnas
             </Button>
           </div>
         }
@@ -301,7 +301,7 @@ function Trades() {
           <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 xl:grid-cols-4">
             <Card>
               <CardHeader>
-                <CardTitle>Net cumulative P&L</CardTitle>
+                <CardTitle>P&L neto acumulado</CardTitle>
               </CardHeader>
               <CardContent>
                 <Pnl value={m.netPnl} className="text-xl font-semibold" />
@@ -324,7 +324,7 @@ function Trades() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Trade win %</CardTitle>
+                <CardTitle>% trades ganadores</CardTitle>
               </CardHeader>
               <CardContent>
                 <span className="text-xl font-semibold tnum">{fmtPercent(m.winRate)}</span>
@@ -332,7 +332,7 @@ function Trades() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Avg win / loss</CardTitle>
+                <CardTitle>Ganancia / pérdida media</CardTitle>
               </CardHeader>
               <CardContent>
                 <span className="text-xl font-semibold tnum">
@@ -367,19 +367,21 @@ function Trades() {
         {selectedKeys.length > 0 && (
           <Card>
             <CardContent className="flex flex-wrap items-center gap-2 py-2">
-              <span className="text-sm text-muted-foreground">{selectedKeys.length} selected</span>
+              <span className="text-sm text-muted-foreground">
+                {selectedKeys.length} seleccionados
+              </span>
               <Button variant="outline" size="sm" onClick={() => bulk("review")}>
                 <Check />
-                Mark reviewed
+                Marcar revisados
               </Button>
               <Button variant="outline" size="sm" onClick={() => bulk("unreview")}>
-                Unreview
+                Quitar revisado
               </Button>
               <div className="flex max-w-full flex-wrap items-center gap-1">
                 <Input
                   value={tagInput}
                   onChange={(event) => setTagInput(event.target.value)}
-                  placeholder="tag"
+                  placeholder="etiqueta"
                   className="h-8 w-28 text-xs"
                 />
                 <Button
@@ -392,7 +394,7 @@ function Trades() {
                   }}
                 >
                   <Tag />
-                  Tag
+                  Etiquetar
                 </Button>
               </div>
               <Button
@@ -401,14 +403,14 @@ function Trades() {
                 onClick={() => {
                   if (
                     confirm(
-                      `Delete ${selectedKeys.length} trades and their executions? This cannot be undone.`,
+                      `¿Borrar ${selectedKeys.length} trades y sus ejecuciones? No se puede deshacer.`,
                     )
                   )
                     void bulk("delete");
                 }}
               >
                 <Trash2 />
-                Delete
+                Borrar
               </Button>
             </CardContent>
           </Card>
@@ -418,7 +420,7 @@ function Trades() {
           <div role="alert" className="space-y-2 text-sm text-destructive">
             <p>{error}</p>
             <Button variant="outline" onClick={refresh}>
-              Try again
+              Reintentar
             </Button>
           </div>
         ) : !data ? (
@@ -481,9 +483,9 @@ function Trades() {
                         colSpan={columns.length}
                         className="py-16 text-center text-muted-foreground"
                       >
-                        No trades match these filters.{" "}
+                        Ningún trade coincide con estos filtros.{" "}
                         <Link href="/import" className="underline">
-                          Import some
+                          Importa trades
                         </Link>
                         .
                       </td>
@@ -496,7 +498,7 @@ function Trades() {
               <div className="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-xs text-muted-foreground">
                 <span>
                   {currentPage * pageSize + 1}–
-                  {Math.min((currentPage + 1) * pageSize, sortedRows.length)} of{" "}
+                  {Math.min((currentPage + 1) * pageSize, sortedRows.length)} de{" "}
                   {fmtNumber(sortedRows.length, 0)} trades
                 </span>
                 <div className="flex items-center gap-2">
@@ -506,10 +508,10 @@ function Trades() {
                     disabled={currentPage === 0}
                     onClick={() => setPage(currentPage - 1)}
                   >
-                    Previous
+                    Anterior
                   </Button>
                   <span>
-                    Page {currentPage + 1} of {pageCount}
+                    Página {currentPage + 1} de {pageCount}
                   </span>
                   <Button
                     variant="outline"
@@ -517,7 +519,7 @@ function Trades() {
                     disabled={currentPage + 1 === pageCount}
                     onClick={() => setPage(currentPage + 1)}
                   >
-                    Next
+                    Siguiente
                   </Button>
                 </div>
               </div>
