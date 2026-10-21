@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { bad, handler, ok, requireValue } from "@/server/api";
 import { connectionKey, providerFor } from "@/server/market-data/connections";
 import { MarketDataError } from "@/server/market-data/provider";
+import { alignToFills } from "@/server/market-data/local-folder";
 import { getTradeByKey, rowToTrade } from "@/server/trades-query";
 import { listExecutions } from "@/server/executions";
 import { isResolution } from "@/lib/market-data";
@@ -78,7 +79,8 @@ export const POST = handler(
         );
       const trade = rowToTrade(row);
       const fingerprint = estimateFingerprint(trade);
-      const history = await provider.history(
+      const fills = listExecutions(row.accountId, trade.executionIds);
+      const fetched = await provider.history(
         {
           symbol: body.symbol.trim(),
           dataset: body.dataset || undefined,
@@ -89,6 +91,8 @@ export const POST = handler(
         },
         connectionKey(provider.id),
       );
+      // Mi carpeta de datos: contrato continuo ajustado → se cuadra con los precios reales.
+      const history = provider.id === "local-folder" ? alignToFills(fetched, fills) : fetched;
       const accountCurrency = db
         .select({ currency: accounts.currency })
         .from(accounts)
@@ -97,7 +101,7 @@ export const POST = handler(
       const currencyMatches = !history.quoteCurrency || history.quoteCurrency === accountCurrency;
       const estimate = estimateExcursions(
         trade,
-        listExecutions(row.accountId, trade.executionIds),
+        fills,
         history,
         body.basisConfirmed === true && currencyMatches,
       );

@@ -19,6 +19,7 @@ import { TradeChart, type ChartExecution, type ChartTrade } from "./trade-chart"
 import { usePrivacy } from "./privacy";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { applyChartTimeZone, useJournalTimeZone } from "@/lib/journal-timezone";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { OptionSelect } from "./ui/option-select";
@@ -558,6 +559,10 @@ function ReplayChart({
   const update = useRef<(() => void) | null>(null);
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
+  const timeZone = useJournalTimeZone();
+  const timeZoneRef = useRef(timeZone);
+  timeZoneRef.current = timeZone;
+  useEffect(() => applyChartTimeZone(chart.current, timeZone), [timeZone, ready]);
   useEffect(() => {
     let disposed = false;
     let cleanup = () => {};
@@ -620,6 +625,7 @@ function ReplayChart({
         drawings: false,
       });
       chart.current = instance;
+      applyChartTimeZone(instance, timeZoneRef.current);
       frame.current = latest.current;
       instance.addNativeIndicator(type);
       let updating = false;

@@ -6,6 +6,8 @@ export interface CredentialField {
   environmentKey: string;
   options?: { value: string; label: string }[];
   defaultValue?: string;
+  /** Se muestra en claro (p. ej. una ruta), no como contraseña. */
+  plain?: boolean;
 }
 export interface ProviderInfo {
   id: string;
@@ -97,6 +99,22 @@ export const MARKET_PROVIDERS: ProviderInfo[] = [
     symbolHint:
       "Usa el símbolo y la temporalidad exactos con los que subiste el archivo. Elige un conjunto de datos si los archivos se solapan.",
     fields: [],
+  },
+  {
+    id: "local-folder",
+    name: "Mi carpeta de datos",
+    mode: "credentials",
+    description:
+      "Lee las velas directamente de tus archivos CSV de BacktestMarket (p. ej. data\\NQ\\nq-1m_bk.csv), sin subirlos. Convierte la hora de Chicago y cuadra el contrato continuo ajustado con tus precios reales. La primera vez que uses un archivo grande tarda unos segundos en indexarlo.",
+    symbolHint: "Vale el símbolo del trade (MNQZ5, MES…) o directamente NQ, ES o YM.",
+    fields: [
+      {
+        key: "path",
+        label: "Ruta de la carpeta",
+        environmentKey: "JOURNAL_MARKET_FOLDER",
+        plain: true,
+      },
+    ],
   },
 ];
 export const providerInfo = (id: string) => MARKET_PROVIDERS.find((item) => item.id === id);

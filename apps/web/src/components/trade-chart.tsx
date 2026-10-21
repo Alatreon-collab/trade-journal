@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { fmtMoney } from "@/lib/utils";
 import { usePrivacy } from "./privacy";
 import { EquityArea } from "./charts/equity-area";
+import { applyChartTimeZone, useJournalTimeZone } from "@/lib/journal-timezone";
 
 export interface ChartExecution {
   side: "buy" | "sell";
@@ -86,6 +87,11 @@ function PriceChart({
   height?: number;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<unknown>(null);
+  const timeZone = useJournalTimeZone();
+  const timeZoneRef = useRef(timeZone);
+  timeZoneRef.current = timeZone;
+  useEffect(() => applyChartTimeZone(chartRef.current, timeZone), [timeZone]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -220,6 +226,8 @@ function PriceChart({
           volume: 0,
         })),
       });
+      chartRef.current = chart;
+      applyChartTimeZone(chart, timeZoneRef.current);
       let indicator = chart.addNativeIndicator(type);
       const themeObserver = new MutationObserver(() => {
         const nextDark = document.documentElement.classList.contains("dark");
@@ -238,6 +246,7 @@ function PriceChart({
       });
       cleanup = () => {
         themeObserver.disconnect();
+        if (chartRef.current === chart) chartRef.current = null;
         chart.destroy();
         unregisterNativeIndicator(type);
       };

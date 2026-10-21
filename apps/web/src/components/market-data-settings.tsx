@@ -77,7 +77,9 @@ function Connection({
             ? "Fuente pública accesible. No hace falta API key ni plan de pago. La disponibilidad de velas depende del par, del rango de fechas y de los límites de la API pública."
             : "Conexión verificada. Los instrumentos disponibles dependen de tu acceso con el proveedor."
           : action === "save"
-            ? "Credenciales guardadas. Prueba la conexión para verificar el acceso."
+            ? connection.id === "local-folder"
+              ? "Carpeta guardada. Pulsa «Probar conexión» para comprobar que encuentra tus archivos."
+              : "Credenciales guardadas. Prueba la conexión para verificar el acceso."
             : action === "enable"
               ? "Datos de mercado públicos activados."
               : "Conexión eliminada.",
@@ -99,7 +101,9 @@ function Connection({
             : connection.configured
               ? publicSource
                 ? "Activado · no necesita clave"
-                : "Credenciales guardadas"
+                : connection.id === "local-folder"
+                  ? "Carpeta guardada"
+                  : "Credenciales guardadas"
               : "Sin conectar"}
         </span>
       </div>
@@ -138,7 +142,7 @@ function Connection({
             ) : (
               <Input
                 id={`key-${connection.id}-${field.key}`}
-                type="password"
+                type={field.plain ? "text" : "password"}
                 value={fields[field.key] ?? ""}
                 onChange={(event) =>
                   setFields((current) => ({ ...current, [field.key]: event.target.value }))
