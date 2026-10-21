@@ -16,6 +16,8 @@ import { postJson } from "@/lib/use-api";
 
 import { AccountPicker } from "./account-picker";
 import { fmtNumber } from "@/lib/utils";
+import { parseTimestamp } from "@luxalgo/journal-importers";
+import { useJournalTimeZone } from "@/lib/journal-timezone";
 
 interface ManualLeg {
   datetime: string;
@@ -36,6 +38,10 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const fieldId = useId();
+  // La hora se escribe en la zona del journal (Nueva York), no en la del PC.
+  const timeZone = useJournalTimeZone() ?? "America/New_York";
+  const toUtc = (datetime: string) =>
+    parseTimestamp(datetime, timeZone) ?? new Date(datetime).toISOString();
 
   const setLeg = (index: number, patch: Partial<ManualLeg>) =>
     setLegs((current) => current.map((leg, i) => (i === index ? { ...leg, ...patch } : leg)));
@@ -61,7 +67,7 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
             quantity: Number(leg.quantity),
             price: Number(leg.price),
             fee: leg.fee === "" ? 0 : Number(leg.fee),
-            executedAt: new Date(leg.datetime).toISOString(),
+            executedAt: toUtc(leg.datetime),
           })),
       });
       onSaved();
@@ -96,7 +102,7 @@ export function ManualTradeEntry({ onSaved }: { onSaved: () => void }) {
           >
             <legend className="px-1 text-xs text-muted-foreground">Ejecución {index + 1}</legend>
             <label className="manual-execution-date grid min-w-0 gap-1 text-xs text-muted-foreground">
-              Fecha y hora
+              Fecha y hora ({timeZone === "America/New_York" ? "hora de Nueva York" : timeZone})
               <Input
                 type="datetime-local"
                 value={leg.datetime}
