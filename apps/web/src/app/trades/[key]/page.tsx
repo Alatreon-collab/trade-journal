@@ -1,4 +1,5 @@
 "use client";
+import { fmtPoints, tradePoints } from "@/lib/points";
 import { AiNotice } from "@/components/ai-notice";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -40,7 +41,7 @@ import { PsychCard } from "@/components/psych-card";
 import { parsePsych, TRADE_PSYCH_GROUPS } from "@/lib/psychology";
 import { useAutosave } from "@/lib/use-autosave";
 import { postJson, useApi } from "@/lib/use-api";
-import { fmtDuration, fmtMoney, fmtNumber, fmtPercent } from "@/lib/utils";
+import { fmtDuration, fmtMoney, fmtNumber, fmtPercent, pnlClass } from "@/lib/utils";
 import { tradeKeyFromSegment } from "@/lib/trade-links";
 import { formatTimestamp } from "@/lib/timezone";
 
@@ -191,6 +192,13 @@ function TradeView({ tradeKey }: { tradeKey: string }) {
                 monetary
                 value={trade.avgExit === null ? "abierto" : fmtNumber(trade.avgExit)}
               />
+              <Meta
+                label="Puntos"
+                value={fmtPoints(tradePoints(trade.direction, trade.avgEntry, trade.avgExit))}
+                className={pnlClass(
+                  tradePoints(trade.direction, trade.avgEntry, trade.avgExit) ?? 0,
+                )}
+              />
               <Meta label="Duración" value={fmtDuration(trade.durationMs)} />
               <Meta
                 label="Neto / nocional de entrada"
@@ -321,15 +329,17 @@ function Meta({
   label,
   value,
   monetary = false,
+  className = "",
 }: {
   label: string;
   value: string;
   monetary?: boolean;
+  className?: string;
 }) {
   return (
     <div>
       <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="tnum text-sm font-medium">
+      <div className={`tnum text-sm font-medium ${className}`}>
         {monetary ? <MonetaryValue>{value}</MonetaryValue> : value}
       </div>
     </div>

@@ -26,7 +26,8 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import Loading from "@/app/loading";
 import { postJson, useApi } from "@/lib/use-api";
-import { cn, fmtDuration, fmtMoney, fmtNumber, fmtPercent } from "@/lib/utils";
+import { cn, fmtDuration, fmtMoney, fmtNumber, fmtPercent, pnlClass } from "@/lib/utils";
+import { fmtPoints, tradePoints } from "@/lib/points";
 
 interface TradeRow {
   key: string;
@@ -171,6 +172,20 @@ function Trades() {
             </MonetaryValue>
           </span>
         ),
+      },
+      {
+        id: "points",
+        accessorFn: (row) => tradePoints(row.direction, row.avgEntry, row.avgExit),
+        header: "Puntos",
+        sortUndefined: "last",
+        cell: ({ getValue }) => {
+          const points = getValue<number | null>();
+          return (
+            <span className={cn("tnum", points === null ? "" : pnlClass(points))}>
+              {fmtPoints(points)}
+            </span>
+          );
+        },
       },
       {
         id: "netPnl",
