@@ -22,7 +22,8 @@ import { result } from "./http";
 /**
  * Velas leídas directamente de una carpeta del PC (formato BacktestMarket):
  *   carpeta/NQ/nq-1m_bk.csv  →  "12/12/2008;17:00;open;high;low;close;volume"
- * Las horas están en hora de Chicago. Los archivos no se copian ni se modifican:
+ * La zona horaria del archivo (Chicago, Nueva York…) se detecta por la pausa diaria del
+ * CME. Los archivos no se copian ni se modifican:
  * se crea un índice pequeño (dónde empieza cada día) y se lee solo el trozo necesario.
  */
 
@@ -94,7 +95,12 @@ const findFile = (root: string, symbol: string, resolution: Resolution) => {
   const wanted = TIMEFRAME_FILES[resolution];
   for (const candidate of symbolCandidates(symbol)) {
     const file = files.find((item) => item.symbol === candidate && item.timeframe === wanted);
-    if (file) return { file, root: candidate };
+    if (file) {
+      const reference = ["1m", "5m", "15m"]
+        .map((tf) => files.find((item) => item.symbol === candidate && item.timeframe === tf))
+        .find(Boolean);
+      return { file, root: candidate, reference: reference?.path };
+    }
   }
   const symbols = [...new Set(files.map((item) => item.symbol))].sort().join(", ");
   throw new MarketDataError(
@@ -104,25 +110,31 @@ const findFile = (root: string, symbol: string, resolution: Resolution) => {
   );
 };
 
-// ---- Hora de Chicago → UTC ----
+// ---- Hora del archivo → UTC ----
 
-const chicago = new Intl.DateTimeFormat("en-US", {
-  timeZone: "America/Chicago",
-  hourCycle: "h23",
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-const offsetCache = new Map<number, number>();
-/** Minutos que Chicago va por detrás de UTC en ese instante (300 o 360). */
-const chicagoOffset = (utc: number): number => {
+const formatters = new Map<string, Intl.DateTimeFormat>();
+const offsetCache = new Map<string, number>();
+/** Minutos que la zona va por detrás de UTC en ese instante (p. ej. 300 o 360 en Chicago). */
+const zoneOffset = (timeZone: string, utc: number): number => {
   const hourKey = Math.floor(utc / 3_600_000);
-  const cached = offsetCache.get(hourKey);
+  const cacheKey = `${timeZone}|${hourKey}`;
+  const cached = offsetCache.get(cacheKey);
   if (cached !== undefined) return cached;
+  let formatter = formatters.get(timeZone);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      hourCycle: "h23",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    formatters.set(timeZone, formatter);
+  }
   const parts = Object.fromEntries(
-    chicago.formatToParts(new Date(hourKey * 3_600_000)).map((p) => [p.type, p.value]),
+    formatter.formatToParts(new Date(hourKey * 3_600_000)).map((p) => [p.type, p.value]),
   );
   const asUtc = Date.UTC(
     Number(parts.year),
@@ -133,16 +145,45 @@ const chicagoOffset = (utc: number): number => {
   );
   const offset = Math.round((hourKey * 3_600_000 - asUtc) / 60_000);
   if (offsetCache.size > 50_000) offsetCache.clear();
-  offsetCache.set(hourKey, offset);
+  offsetCache.set(cacheKey, offset);
   return offset;
 };
 
-export function chicagoToUtc(y: number, m: number, d: number, hh: number, mm: number): number {
+export function zoneToUtc(
+  timeZone: string,
+  y: number,
+  m: number,
+  d: number,
+  hh: number,
+  mm: number,
+): number {
   const wall = Date.UTC(y, m - 1, d, hh, mm);
-  let utc = wall + chicagoOffset(wall + 6 * 3_600_000) * 60_000;
-  utc = wall + chicagoOffset(utc) * 60_000;
+  let utc = wall + zoneOffset(timeZone, wall + 6 * 3_600_000) * 60_000;
+  utc = wall + zoneOffset(timeZone, utc) * 60_000;
   return utc;
 }
+
+export const chicagoToUtc = (y: number, m: number, d: number, hh: number, mm: number) =>
+  zoneToUtc("America/Chicago", y, m, d, hh, mm);
+
+/**
+ * La pausa diaria del CME es a las 17:00 de Nueva York (16:00 en Chicago).
+ * La hora con menos velas del archivo dice en qué zona horaria está escrito.
+ */
+const ZONES: Record<number, { timeZone: string; label: string }> = {
+  17: { timeZone: "America/New_York", label: "Nueva York" },
+  16: { timeZone: "America/Chicago", label: "Chicago" },
+  15: { timeZone: "America/Denver", label: "Denver" },
+  14: { timeZone: "America/Los_Angeles", label: "Los Ángeles" },
+  21: { timeZone: "UTC", label: "UTC" },
+  22: { timeZone: "UTC", label: "UTC" },
+};
+export const breakHour = (hours: number[]): number => {
+  let best = 16;
+  for (let hour = 0; hour < 24; hour++) if (hours[hour]! < hours[best]!) best = hour;
+  return best;
+};
+export const zoneForBreak = (hour: number) => ZONES[hour] ?? ZONES[16]!;
 
 // ---- Índice: dónde empieza cada día dentro del archivo ----
 
@@ -153,11 +194,15 @@ interface FileIndex {
   days: [string, number][];
   /** El primer número de la fecha es el día (12/12/2008) o el mes. */
   dayFirst: boolean;
-  /** La hora de la vela es su apertura (17:00 = primera vela) o su cierre. */
-  openTime: boolean;
-  /** Las velas de la tarde (≥17:00) vienen fechadas con el día de la sesión siguiente. */
+  /** Velas por hora del día (0–23) según la hora escrita en el archivo. */
+  hours: number[];
+  /** Velas cuya hora es exacta (HH:00), por hora del día. */
+  onTheHour: number[];
+  /** No hay velas en domingo: las de la tarde vienen fechadas con el día de la sesión siguiente. */
   sessionDated: boolean;
+  version: number;
 }
+const INDEX_VERSION = 2;
 
 const memoryIndex = new Map<string, Promise<FileIndex>>();
 const indexDir = () => {
@@ -172,9 +217,9 @@ async function buildIndex(path: string, size: number, mtimeMs: number): Promise<
   const rawDays: [string, number][] = [];
   let firstMax = 0,
     secondMax = 0,
-    at1700 = 0,
-    at1600 = 0,
     rows = 0;
+  const hours = Array<number>(24).fill(0);
+  const onTheHour = Array<number>(24).fill(0);
   let previousDate = "";
   let offset = 0;
   let carry: Buffer = Buffer.alloc(0);
@@ -185,8 +230,11 @@ async function buildIndex(path: string, size: number, mtimeMs: number): Promise<
     if (!/^\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4}$/.test(date)) return; // cabecera u otra línea
     rows++;
     const time = line.slice(sep + 1, sep + 6);
-    if (time === "17:00") at1700++;
-    else if (time === "16:00") at1600++;
+    const hour = Number(time.slice(0, 2));
+    if (hour >= 0 && hour < 24 && time[2] === ":") {
+      hours[hour]!++;
+      if (time.endsWith(":00")) onTheHour[hour]!++;
+    }
     if (date !== previousDate) {
       previousDate = date;
       rawDays.push([date, lineStart]);
@@ -229,9 +277,11 @@ async function buildIndex(path: string, size: number, mtimeMs: number): Promise<
     mtimeMs,
     days,
     dayFirst,
-    openTime: at1700 > 0 || at1600 === 0,
+    hours,
+    onTheHour,
     // Los diarios no tienen domingo y es normal; en intradía, sin domingos ⇒ fecha de sesión.
     sessionDated: !/-1d|-1w|-1mo/i.test(basename(path)) && sundays === 0 && days.length > 20,
+    version: INDEX_VERSION,
   };
 }
 
@@ -245,7 +295,8 @@ async function fileIndex(path: string): Promise<FileIndex> {
     if (existsSync(stored)) {
       try {
         const index = JSON.parse(readFileSync(stored, "utf8")) as FileIndex;
-        if (index.size === size && index.mtimeMs === mtimeMs) return index;
+        if (index.size === size && index.mtimeMs === mtimeMs && index.version === INDEX_VERSION)
+          return index;
       } catch {
         // índice dañado: se rehace
       }
@@ -263,7 +314,20 @@ async function fileIndex(path: string): Promise<FileIndex> {
 
 const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
-function parseRows(text: string, index: FileIndex, resolution: Resolution): MarketBar[] {
+interface ReadOptions {
+  timeZone: string;
+  /** La hora escrita es la apertura de la vela (si no, su cierre). */
+  openTime: boolean;
+  /** Hora (en el archivo) a la que abre la sesión tras la pausa diaria. */
+  openHour: number;
+}
+
+function parseRows(
+  text: string,
+  index: FileIndex,
+  resolution: Resolution,
+  options: ReadOptions,
+): MarketBar[] {
   const step = RESOLUTIONS[resolution];
   const bars: MarketBar[] = [];
   for (const line of text.split("\n")) {
@@ -279,9 +343,9 @@ function parseRows(text: string, index: FileIndex, resolution: Resolution): Mark
     let time: number;
     if (resolution === "1d") time = Date.UTC(y, m - 1, d);
     else {
-      time = chicagoToUtc(y, m, d, hh, mm);
-      if (index.sessionDated && hh >= 17) time -= 86_400_000;
-      if (!index.openTime) time -= step;
+      time = zoneToUtc(options.timeZone, y, m, d, hh, mm);
+      if (index.sessionDated && hh >= options.openHour) time -= 86_400_000;
+      if (!options.openTime) time -= step;
     }
     bars.push({
       time,
@@ -295,23 +359,47 @@ function parseRows(text: string, index: FileIndex, resolution: Resolution): Mark
   return bars.sort((x, y) => x.time - y.time);
 }
 
-export async function readBars(path: string, resolution: Resolution, from: number, to: number) {
+/** Zona horaria del archivo y si la hora es la de apertura de la vela. */
+async function readOptions(index: FileIndex, reference?: string) {
+  // Los archivos de minutos dicen mejor dónde está la pausa diaria que los de horas.
+  const ref = reference ? await fileIndex(reference) : index;
+  const pause = breakHour(ref.hours);
+  const zone = zoneForBreak(pause);
+  const openHour = (pause + 1) % 24;
+  return {
+    zone,
+    options: { timeZone: zone.timeZone, openTime: index.onTheHour[openHour]! > 0, openHour },
+  };
+}
+
+export async function readBars(
+  path: string,
+  resolution: Resolution,
+  from: number,
+  to: number,
+  reference?: string,
+) {
   const index = await fileIndex(path);
-  if (!index.days.length) return { bars: [] as MarketBar[], index };
+  const { zone, options } = await readOptions(index, reference);
+  if (!index.days.length) return { bars: [] as MarketBar[], index, zone };
   const pad = resolution === "1d" ? 7 : 2;
   const startDay = isoDay(from - pad * 86_400_000);
   const endDay = isoDay(to + pad * 86_400_000);
   const first = index.days.findIndex(([day]) => day >= startDay);
-  if (first === -1) return { bars: [], index };
+  if (first === -1) return { bars: [], index, zone };
   const afterLast = index.days.findIndex(([day]) => day > endDay);
   const start = index.days[first]![1];
   const end = afterLast === -1 ? index.size : index.days[afterLast]![1];
-  if (end <= start) return { bars: [], index };
+  if (end <= start) return { bars: [], index, zone };
   const handle = await open(path, "r");
   try {
     const buffer = Buffer.alloc(end - start);
     await handle.read(buffer, 0, buffer.length, start);
-    return { bars: parseRows(buffer.toString("latin1"), index, resolution), index };
+    return {
+      bars: parseRows(buffer.toString("latin1"), index, resolution, options),
+      index,
+      zone,
+    };
   } finally {
     await handle.close();
   }
@@ -400,12 +488,18 @@ export const localFolder: MarketDataProvider = {
       );
   },
   async history(request, key) {
-    const { file, root } = findFile(folderFrom(key), request.symbol, request.resolution);
+    const { file, root, reference } = findFile(folderFrom(key), request.symbol, request.resolution);
     const step = RESOLUTIONS[request.resolution];
     // Algo de contexto antes y después del trade para el gráfico y el replay.
     const from = request.from - 30 * step;
     const to = Math.min(request.to + 15 * step, Date.now());
-    const { bars, index } = await readBars(file.path, request.resolution, from, to);
+    const { bars, index, zone } = await readBars(
+      file.path,
+      request.resolution,
+      from,
+      to,
+      reference,
+    );
     const firstDay = index.days[0]?.[0];
     const lastDay = index.days.at(-1)?.[0];
     const covered = bars.some((bar) => bar.time <= request.from && request.from < bar.time + step);
@@ -422,7 +516,9 @@ export const localFolder: MarketDataProvider = {
       { ...request, symbol: root, from, to },
       bars,
       false,
-      [`Velas de ${basename(file.path)} (hora de Chicago convertida automáticamente).`],
+      [
+        `Velas de ${basename(file.path)} (el archivo está en hora de ${zone.label}; convertida automáticamente).`,
+      ],
       "USD",
     );
   },

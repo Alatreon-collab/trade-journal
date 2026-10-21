@@ -20,7 +20,8 @@ afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 const START = Date.UTC(2026, 2, 5, 0, 0); // jueves 5 de marzo de 2026
 const END = Date.UTC(2026, 2, 12, 0, 0); // incluye el cambio de hora del 8 de marzo
 const ADJUST = 1.02; // contrato continuo ajustado: precios del archivo = reales × 1,02
-const realBase = (time: number) => 20000 + (((time - START) / 60_000) % 100);
+// 10 puntos por minuto: un desfase de una vela se notaría en las comprobaciones.
+const realBase = (time: number) => 20000 + (((time - START) / 60_000) % 100) * 10;
 
 const wall = new Intl.DateTimeFormat("en-GB", {
   timeZone: "America/Chicago",
@@ -34,7 +35,16 @@ const wall = new Intl.DateTimeFormat("en-GB", {
 });
 
 /** Archivo como los de BacktestMarket: hora de Chicago, día/mes/año, separador ";". */
-function writeFolder(name: string, closeTime: boolean) {
+function writeFolder(name: string, closeTime: boolean, labelZone = "America/Chicago") {
+  const label = new Intl.DateTimeFormat("en-GB", {
+    timeZone: labelZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   const folder = join(scratch, name);
   mkdirSync(join(folder, "NQ"), { recursive: true });
   const lines: string[] = [];
@@ -46,7 +56,7 @@ function writeFolder(name: string, closeTime: boolean) {
     if (hour === 16) continue; // pausa diaria
     const base = realBase(time);
     const stamp = closeTime ? new Date(time + 60_000) : new Date(time);
-    const q = Object.fromEntries(wall.formatToParts(stamp).map((x) => [x.type, x.value]));
+    const q = Object.fromEntries(label.formatToParts(stamp).map((x) => [x.type, x.value]));
     const f = (n: number) => (n * ADJUST).toFixed(6);
     lines.push(
       `${q.day}/${q.month}/${q.year};${q.hour}:${q.minute};${f(base)};${f(base + 5)};${f(base - 5)};${f(base + 1)};100`,
@@ -58,6 +68,9 @@ function writeFolder(name: string, closeTime: boolean) {
 
 const workFolder = writeFolder("open-time", false);
 const closeFolder = writeFolder("close-time", true);
+// Otros proveedores escriben la hora de Nueva York: se detecta por la pausa diaria.
+const newYorkFolder = writeFolder("new-york", false, "America/New_York");
+const newYorkCloseFolder = writeFolder("new-york-close", true, "America/New_York");
 
 describe("símbolos y hora de Chicago", () => {
   it("maps micro contracts to their full-size data", () => {
@@ -133,6 +146,8 @@ describe("Mi carpeta de datos", () => {
   for (const [label, folder] of [
     ["bar-open timestamps", workFolder],
     ["bar-close timestamps", closeFolder],
+    ["New York time", newYorkFolder],
+    ["New York time, bar-close timestamps", newYorkCloseFolder],
   ] as const)
     it(`reads the trade's day, converts Chicago time and undoes the adjustment (${label})`, async () => {
       saveConnection("local-folder", JSON.stringify({ path: folder }));
