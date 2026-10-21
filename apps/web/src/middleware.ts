@@ -20,6 +20,8 @@ export const middleware = (request: NextRequest) => {
   return NextResponse.next();
 };
 
+// Las copias (/api/backup) quedan fuera: el middleware recorta los cuerpos de más
+// de 10 MB y una copia con imágenes pesa más. La ruta valida la sesión igualmente.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/backup).*)"],
 };

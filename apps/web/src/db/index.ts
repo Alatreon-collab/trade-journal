@@ -4,6 +4,7 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import * as schema from "./schema";
 import { BOOTSTRAP_SQL } from "./bootstrap";
+import { installChangeTracking } from "./change-tracking";
 
 export const dataDir = (): string => process.env.JOURNAL_DATA_DIR ?? join(process.cwd(), "data");
 
@@ -49,6 +50,8 @@ const createDb = () => {
       first_time = json_extract(bars_json, '$[0].time'),
       last_time = json_extract(bars_json, '$[#-1].time') WHERE bar_count = 0`);
   })();
+  // Hora del último cambio, para avisar al restaurar una copia más antigua.
+  installChangeTracking(sqlite);
   return drizzle(sqlite, { schema });
 };
 
