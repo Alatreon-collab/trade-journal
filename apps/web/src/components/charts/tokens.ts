@@ -57,7 +57,10 @@ function subscribeTokens(listener: () => void) {
       listeners.forEach((notify) => notify());
     };
     observer = new MutationObserver(read);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "data-colors"],
+    });
     read();
   }
   return () => {

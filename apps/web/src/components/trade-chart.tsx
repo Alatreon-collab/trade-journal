@@ -5,6 +5,7 @@ import { fmtMoney } from "@/lib/utils";
 import { usePrivacy } from "./privacy";
 import { EquityArea } from "./charts/equity-area";
 import { applyChartTimeZone, useJournalTimeZone } from "@/lib/journal-timezone";
+import { readVizTokens } from "./charts/tokens";
 
 export interface ChartExecution {
   side: "buy" | "sell";
@@ -115,8 +116,9 @@ function PriceChart({
       const durationMs = Math.max(closeMs - openMs, 60_000);
       const pad = Math.max(durationMs * 0.35, 15 * 60_000);
 
-      let profitColor = dark ? "#0ca30c" : "#006300";
-      const lossColor = "#d03b3b";
+      // Colores elegidos en Ajustes → Colores.
+      let profitColor = readVizTokens().profit;
+      let lossColor = readVizTokens().loss;
       let entryColor = trade.direction === "long" ? profitColor : lossColor;
 
       // Engine-free trade painting: a per-mount native indicator that emits
@@ -231,9 +233,9 @@ function PriceChart({
       let indicator = chart.addNativeIndicator(type);
       const themeObserver = new MutationObserver(() => {
         const nextDark = document.documentElement.classList.contains("dark");
-        if (dark === nextDark) return;
         dark = nextDark;
-        profitColor = dark ? "#0ca30c" : "#006300";
+        profitColor = readVizTokens().profit;
+        lossColor = readVizTokens().loss;
         entryColor = trade.direction === "long" ? profitColor : lossColor;
         chart.setTheme(dark ? "dark" : "light");
         // Repaint annotations without recreating the price chart or fetching candles.
@@ -242,7 +244,7 @@ function PriceChart({
       });
       themeObserver.observe(document.documentElement, {
         attributes: true,
-        attributeFilter: ["class"],
+        attributeFilter: ["class", "data-colors"],
       });
       cleanup = () => {
         themeObserver.disconnect();

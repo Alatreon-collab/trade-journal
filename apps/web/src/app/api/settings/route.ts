@@ -14,12 +14,15 @@ import {
 } from "@/server/settings";
 import { AI_PROVIDERS, AI_PROVIDER_NAMES, isAiProvider, type AiProvider } from "@/lib/ai-settings";
 import { isTimeZone } from "@/lib/timezone";
+import { parseColors, sanitizeColors, type ColorSettings } from "@/lib/colors";
+import { getSetting } from "@/server/settings";
 
 export const GET = handler(() =>
   ok({
     timeZone: getTimeZone(),
     importTimeZone: getImportTimeZone(),
     multipliers: getMultipliers(),
+    colors: parseColors(getSetting("colors")),
     ...getAiSettings(),
   }),
 );
@@ -33,6 +36,7 @@ interface SettingsBody {
   openaiKey?: string | null;
   aiProvider?: AiProvider;
   aiModel?: string;
+  colors?: ColorSettings;
 }
 
 export const PATCH = handler(async (request: Request) => {
@@ -84,6 +88,16 @@ export const PATCH = handler(async (request: Request) => {
       setSetting("importTimeZone", body.importTimeZone ?? getImportTimeZone());
     if (body.timeZone !== undefined) setSetting("timeZone", body.timeZone);
   });
+  if (body.colors !== undefined) {
+    let colors: ColorSettings;
+    try {
+      colors = sanitizeColors(body.colors);
+    } catch (error) {
+      requireValue(false, error instanceof Error ? error.message : "Colores no válidos.");
+      throw error;
+    }
+    setSetting("colors", JSON.stringify(colors));
+  }
   if (body.multipliers !== undefined)
     db.transaction(() => {
       setSetting("multipliers", JSON.stringify(body.multipliers));

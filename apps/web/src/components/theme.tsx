@@ -7,6 +7,9 @@ import { Button } from "./ui/button";
 
 const ThemeContext = createContext({ theme: "dark" as Theme, ready: false, toggle: () => {} });
 
+/** Tema actual (claro u oscuro). */
+export const useTheme = () => useContext(ThemeContext);
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark");
   const [ready, setReady] = useState(false);

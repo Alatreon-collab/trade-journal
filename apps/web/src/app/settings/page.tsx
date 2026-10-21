@@ -5,6 +5,7 @@ import { JournalDefaultSettings } from "@/components/journal-default-settings";
 import { MarketDataSettings } from "@/components/market-data-settings";
 import { AiSettings } from "@/components/ai-settings";
 import { BackupCard } from "@/components/backup-card";
+import { ColorsCard } from "@/components/colors-card";
 import { Download } from "lucide-react";
 import { FilterBar } from "@/components/filter-bar";
 import { Button } from "@/components/ui/button";
@@ -150,6 +151,8 @@ function Settings() {
             </Button>
           </CardContent>
         </Card>
+
+        <ColorsCard />
 
         <AiSettings />
 

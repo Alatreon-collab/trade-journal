@@ -20,6 +20,19 @@ import { usePrivacy } from "./privacy";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { applyChartTimeZone, useJournalTimeZone } from "@/lib/journal-timezone";
+import { readVizTokens } from "./charts/tokens";
+
+/** Velas alcistas y bajistas con los colores elegidos en Ajustes → Colores. */
+function applyCandleColors(chart: unknown) {
+  try {
+    const t = readVizTokens();
+    (chart as { renderer: { applyConfig(config: unknown): unknown } }).renderer.applyConfig({
+      candles: { upColor: t.profitFill, downColor: t.loss },
+    });
+  } catch {
+    // el gráfico mantiene sus colores por defecto
+  }
+}
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { OptionSelect } from "./ui/option-select";
@@ -592,7 +605,7 @@ function ReplayChart({
                 yloc: "price" as const,
                 text: `${fill.side.toUpperCase()} ${fill.quantity}`,
                 style: "label_left" as const,
-                color: fill.side === "buy" ? "#087f23" : "#bd2626",
+                color: fill.side === "buy" ? readVizTokens().profitFill : readVizTokens().loss,
                 textColor: "#ffffff",
                 size: "small" as const,
                 textAlign: "center" as const,
@@ -626,6 +639,7 @@ function ReplayChart({
       });
       chart.current = instance;
       applyChartTimeZone(instance, timeZoneRef.current);
+      applyCandleColors(instance);
       frame.current = latest.current;
       instance.addNativeIndicator(type);
       let updating = false;
@@ -647,8 +661,14 @@ function ReplayChart({
       update.current = () => {
         void flush();
       };
-      const observer = new MutationObserver(() => instance.setTheme(dark() ? "dark" : "light"));
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+      const observer = new MutationObserver(() => {
+        instance.setTheme(dark() ? "dark" : "light");
+        applyCandleColors(instance);
+      });
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class", "data-colors"],
+      });
       cleanup = () => {
         update.current = null;
         observer.disconnect();
