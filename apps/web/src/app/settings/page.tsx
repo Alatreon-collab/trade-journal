@@ -132,7 +132,7 @@ function Settings() {
               <textarea
                 value={multipliers}
                 onChange={(event) => setMultipliers(event.target.value)}
-                placeholder={"MNQ=2\nMES=5\nMYM=0.5\nMGC=10\nNQ=20\nES=50"}
+                placeholder={"(vacío: escribe aquí tus multiplicadores)\nEjemplo:\nMNQ=2\nNQ=20"}
                 className="flex min-h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 font-mono text-sm shadow-sm"
               />
             </div>
