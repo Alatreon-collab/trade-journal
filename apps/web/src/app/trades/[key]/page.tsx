@@ -4,7 +4,7 @@ import { AiNotice } from "@/components/ai-notice";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { use, useEffect, useMemo, useRef, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Pencil, Sparkles } from "lucide-react";
 import { FilterBar } from "@/components/filter-bar";
 import { Pnl } from "@/components/pnl";
 import { MonetaryValue, MonetaryField } from "@/components/privacy";
@@ -42,7 +42,9 @@ import { parsePsych, TRADE_PSYCH_GROUPS } from "@/lib/psychology";
 import { useAutosave } from "@/lib/use-autosave";
 import { postJson, useApi } from "@/lib/use-api";
 import { fmtDuration, fmtMoney, fmtNumber, fmtPercent, pnlClass } from "@/lib/utils";
-import { tradeKeyFromSegment } from "@/lib/trade-links";
+import { tradeKeyFromSegment, tradePath } from "@/lib/trade-links";
+import { EditExecutions } from "@/components/edit-executions";
+import { useRouter } from "next/navigation";
 import { formatTimestamp } from "@/lib/timezone";
 
 interface TradeDetail {
@@ -80,6 +82,7 @@ interface TradeDetail {
 
 interface ExecutionRow {
   id: string;
+  source?: string;
   side: "buy" | "sell";
   quantity: number;
   price: number;
@@ -102,6 +105,8 @@ function TradeView({ tradeKey }: { tradeKey: string }) {
   const [aiBusy, setAiBusy] = useState(false);
   const [critique, setCritique] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const router = useRouter();
 
   if (!data) {
     return (
@@ -241,44 +246,74 @@ function TradeView({ tradeKey }: { tradeKey: string }) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Ejecuciones</CardTitle>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <CardTitle>Ejecuciones</CardTitle>
+                {!editing &&
+                  executions.length > 0 &&
+                  executions.every((execution) => execution.source === "manual") && (
+                    <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+                      <Pencil />
+                      Editar ejecuciones
+                    </Button>
+                  )}
+              </div>
               <p className="text-xs text-muted-foreground">Horas en {timeZone}</p>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Hora</TableHead>
-                    <TableHead>Lado</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Precio</TableHead>
-                    <TableHead>Comisión</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {executions
-                    .sort((a, b) => a.executedAt.localeCompare(b.executedAt))
-                    .map((execution) => (
-                      <TableRow key={execution.id}>
-                        <TableCell className="text-muted-foreground">
-                          {formatTimestamp(execution.executedAt, timeZone)}
-                        </TableCell>
-                        <TableCell>
-                          <span className={execution.side === "buy" ? "text-profit" : "text-loss"}>
-                            {execution.side === "buy" ? "▲ COMPRA" : "▼ VENTA"}
-                          </span>
-                        </TableCell>
-                        <TableCell className="tnum">{fmtNumber(execution.quantity, 4)}</TableCell>
-                        <TableCell className="tnum">
-                          <MonetaryValue>{fmtNumber(execution.price)}</MonetaryValue>
-                        </TableCell>
-                        <TableCell className="tnum text-muted-foreground">
-                          <MonetaryValue>{fmtMoney(execution.fee)}</MonetaryValue>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+              {editing ? (
+                <EditExecutions
+                  executions={executions}
+                  timeZone={timeZone}
+                  onCancel={() => setEditing(false)}
+                  onSave={async (rows) => {
+                    const result = await postJson<{ key: string }>(
+                      `/api/trades/${encodeURIComponent(trade.key)}/executions`,
+                      { executions: rows },
+                      "PUT",
+                    );
+                    setEditing(false);
+                    if (result.key !== trade.key) router.replace(tradePath(result.key));
+                    else refresh();
+                  }}
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Hora</TableHead>
+                      <TableHead>Lado</TableHead>
+                      <TableHead>Cantidad</TableHead>
+                      <TableHead>Precio</TableHead>
+                      <TableHead>Comisión</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {executions
+                      .sort((a, b) => a.executedAt.localeCompare(b.executedAt))
+                      .map((execution) => (
+                        <TableRow key={execution.id}>
+                          <TableCell className="text-muted-foreground">
+                            {formatTimestamp(execution.executedAt, timeZone)}
+                          </TableCell>
+                          <TableCell>
+                            <span
+                              className={execution.side === "buy" ? "text-profit" : "text-loss"}
+                            >
+                              {execution.side === "buy" ? "▲ COMPRA" : "▼ VENTA"}
+                            </span>
+                          </TableCell>
+                          <TableCell className="tnum">{fmtNumber(execution.quantity, 4)}</TableCell>
+                          <TableCell className="tnum">
+                            <MonetaryValue>{fmtNumber(execution.price)}</MonetaryValue>
+                          </TableCell>
+                          <TableCell className="tnum text-muted-foreground">
+                            <MonetaryValue>{fmtMoney(execution.fee)}</MonetaryValue>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </div>
