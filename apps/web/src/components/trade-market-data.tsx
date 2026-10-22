@@ -5,6 +5,7 @@ import type { Vela } from "@luxalgo/vela";
 import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw, SkipForward } from "lucide-react";
 import {
   RESOLUTIONS,
+  isResolution,
   type MarketConnection,
   type ExcursionEstimate,
   type Resolution,
@@ -36,6 +37,35 @@ function applyCandleColors(chart: unknown) {
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { OptionSelect } from "./ui/option-select";
+
+interface MarketChoice {
+  provider: string;
+  resolution: Resolution;
+  confirmed: boolean;
+}
+const CHOICE_KEY = "journal-market-choice-v1";
+const AUTO_LOAD_PROVIDERS = ["local-folder"];
+const readChoice = (): MarketChoice | null => {
+  try {
+    const value = JSON.parse(localStorage.getItem(CHOICE_KEY) ?? "null") as MarketChoice | null;
+    return value && typeof value.provider === "string" && isResolution(value.resolution)
+      ? {
+          provider: value.provider,
+          resolution: value.resolution,
+          confirmed: Boolean(value.confirmed),
+        }
+      : null;
+  } catch {
+    return null;
+  }
+};
+const saveChoice = (choice: MarketChoice) => {
+  try {
+    localStorage.setItem(CHOICE_KEY, JSON.stringify(choice));
+  } catch {
+    // sin almacenamiento: se elige a mano cada vez
+  }
+};
 
 export function TradeMarketData({
   trade,
@@ -72,8 +102,13 @@ export function TradeMarketData({
     setResult(null);
     setError("");
   };
-  const load = async () => {
-    if (!available.some((item) => item.id === provider) || (info?.datasets && !dataset)) return;
+  const load = async (choice?: MarketChoice) => {
+    const use = choice ?? { provider, resolution, confirmed };
+    if (
+      !available.some((item) => item.id === use.provider) ||
+      (providerInfo(use.provider)?.datasets && !dataset)
+    )
+      return;
     controller.current?.abort();
     const request = new AbortController();
     controller.current = request;
@@ -85,11 +120,11 @@ export function TradeMarketData({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          provider,
+          provider: use.provider,
           symbol,
           dataset,
-          resolution,
-          basisConfirmed: confirmed,
+          resolution: use.resolution,
+          basisConfirmed: use.confirmed,
         }),
         signal: request.signal,
       });
@@ -98,6 +133,7 @@ export function TradeMarketData({
       if (!request.signal.aborted) {
         setResult(body);
         refreshSaved();
+        saveChoice(use);
       }
     } catch (cause) {
       if (!request.signal.aborted)
@@ -106,6 +142,20 @@ export function TradeMarketData({
       if (!request.signal.aborted) setBusy(false);
     }
   };
+  // Con «Mi carpeta de datos» las velas se cargan solas al abrir el trade (leer el
+  // archivo local es gratis e instantáneo); los proveedores de internet siguen con el botón.
+  const autoLoaded = useRef(false);
+  useEffect(() => {
+    if (autoLoaded.current || !connections || !trade.closedAt) return;
+    autoLoaded.current = true;
+    const choice = readChoice();
+    if (!choice || !AUTO_LOAD_PROVIDERS.includes(choice.provider)) return;
+    if (!available.some((item) => item.id === choice.provider)) return;
+    setProvider(choice.provider);
+    setResolution(choice.resolution);
+    setConfirmed(choice.confirmed);
+    void load(choice);
+  }, [connections]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="space-y-3">
       <Card>
