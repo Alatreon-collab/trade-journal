@@ -48,6 +48,41 @@ export const getLastExport = () => {
     return null;
   }
 };
+const SELECTION_KEY = "botExportSelection";
+
+/**
+ * Qué se exporta: cuentas marcadas y, de los setups no tomados, los de los playbooks
+ * marcados ("" = sin playbook). Por defecto no se exporta ninguna cuenta.
+ */
+export interface ExportSelection {
+  accounts: string[];
+  missedPlaybooks: string[];
+}
+export const getSelection = (): ExportSelection => {
+  try {
+    const value = JSON.parse(readSetting(SELECTION_KEY) ?? "{}") as Partial<ExportSelection>;
+    return {
+      accounts: Array.isArray(value.accounts) ? value.accounts.map(String) : [],
+      missedPlaybooks: Array.isArray(value.missedPlaybooks)
+        ? value.missedPlaybooks.map(String)
+        : [],
+    };
+  } catch {
+    return { accounts: [], missedPlaybooks: [] };
+  }
+};
+export function setSelection(input: unknown) {
+  const raw = (input ?? {}) as Record<string, unknown>;
+  const clean = (value: unknown) =>
+    Array.isArray(value)
+      ? [...new Set(value.filter((item): item is string => typeof item === "string"))].slice(0, 500)
+      : [];
+  writeSetting(
+    SELECTION_KEY,
+    JSON.stringify({ accounts: clean(raw.accounts), missedPlaybooks: clean(raw.missedPlaybooks) }),
+  );
+}
+
 export function setExportPath(path: string) {
   const clean = path.trim().replace(/^"(.*)"$/, "$1");
   if (!clean) {
@@ -243,7 +278,11 @@ export function exportForBot(target = getExportPath()): ExportResult {
   if (!target) throw new RequestError("Elige primero la carpeta de la exportación.");
   mkdirSync(target, { recursive: true });
 
-  const { rows, trades } = queryTrades({});
+  const selection = getSelection();
+  const chosen = new Set(selection.accounts);
+  const all = queryTrades({});
+  const rows = all.rows.filter((row) => chosen.has(row.accountId));
+  const trades = all.trades.filter((trade) => chosen.has(trade.accountId));
   const byKey = new Map(trades.map((trade) => [trade.key, trade]));
   const accountNames = new Map(
     db
@@ -418,7 +457,12 @@ export function exportForBot(target = getExportPath()): ExportResult {
   }
 
   // Setups vistos y no tomados (página «Trades perdidos»).
-  const missed = db.select().from(missedTrades).all();
+  const missedChosen = new Set(selection.missedPlaybooks);
+  const missed = db
+    .select()
+    .from(missedTrades)
+    .all()
+    .filter((item) => !item.archivedAt && missedChosen.has(item.playbookId ?? ""));
   for (const item of missed) {
     const id = `nt_${item.id}`;
     const setup = parsePsych(item.setupJson);

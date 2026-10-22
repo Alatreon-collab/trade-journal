@@ -129,6 +129,38 @@ it("exports trades, executions, rules, images and not-taken setups with a fixed 
     .run();
 
   db.insert(settings).values({ key: "botExportPath", value: out }).run();
+  // Otra cuenta (otro modelo) que no se marca: no debe salir.
+  db.insert(accounts)
+    .values({ id: "otro", name: "Otro modelo", kind: "manual", createdAt: "2026-01-01" })
+    .run();
+  insertExecutions(
+    "otro",
+    [
+      {
+        symbol: "ES",
+        side: "buy",
+        quantity: 1,
+        price: 7000,
+        fee: 0,
+        executedAt: "2026-10-20T13:36:00.000Z",
+      },
+      {
+        symbol: "ES",
+        side: "sell",
+        quantity: 1,
+        price: 7001,
+        fee: 0,
+        executedAt: "2026-10-20T13:40:00.000Z",
+      },
+    ],
+    "manual",
+  );
+  db.insert(settings)
+    .values({
+      key: "botExportSelection",
+      value: JSON.stringify({ accounts: ["bt"], missedPlaybooks: [""] }),
+    })
+    .run();
   const result = exportForBot();
   expect(result).toMatchObject({ trades: 1, notTaken: 1, executions: 2, images: 3 });
 
@@ -160,7 +192,7 @@ it("exports trades, executions, rules, images and not-taken setups with a fixed 
     psico_gestion: "Seguí el plan",
     notas: "Buen sweep",
   });
-  expect(taken!.imagenes.split("|")).toEqual([
+  expect(taken!.imagenes!.split("|")).toEqual([
     `${trade.uid}/4H.png`,
     `${trade.uid}/4H (2).png`,
     `${trade.uid}/15m.png`,
@@ -186,7 +218,13 @@ it("exports trades, executions, rules, images and not-taken setups with a fixed 
     { side: "buy", quantity: 1, price: 29335.75, fee: 2, executedAt: "2026-10-21T13:37:00.000Z" },
     { side: "sell", quantity: 1, price: 29373.25, fee: 2, executedAt: "2026-10-21T13:47:00.000Z" },
   ]);
-  expect(db.select().from(trades).all()[0]!.uid).toBe(trade.uid);
+  expect(
+    db
+      .select()
+      .from(trades)
+      .all()
+      .find((row) => row.accountId === "bt")!.uid,
+  ).toBe(trade.uid);
   db.delete(attachments).run();
   db.delete(missedTrades).run();
   exportForBot();
