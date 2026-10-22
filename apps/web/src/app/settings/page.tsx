@@ -6,6 +6,7 @@ import { MarketDataSettings } from "@/components/market-data-settings";
 import { AiSettings } from "@/components/ai-settings";
 import { BackupCard } from "@/components/backup-card";
 import { ColorsCard } from "@/components/colors-card";
+import { BotExportCard } from "@/components/bot-export-card";
 import { Download } from "lucide-react";
 import { FilterBar } from "@/components/filter-bar";
 import { Button } from "@/components/ui/button";
@@ -157,6 +158,8 @@ function Settings() {
         <AiSettings />
 
         <BackupCard />
+
+        <BotExportCard />
 
         <Card>
           <CardHeader>

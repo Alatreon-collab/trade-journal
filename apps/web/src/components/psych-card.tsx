@@ -1,11 +1,13 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { Brain } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { cn } from "@/lib/utils";
 import { useAutosave } from "@/lib/use-autosave";
 import type { ChipGroup, PsychValues } from "@/lib/psychology";
+import type { TextField } from "@/lib/setup";
+import { Input } from "./ui/input";
 
 /**
  * Tarjeta de psicología con chips: un clic marca, otro clic desmarca.
@@ -20,6 +22,9 @@ export function PsychCard({
   method,
   onSaved,
   notePlaceholder,
+  field = "psych",
+  textFields = [],
+  icon,
 }: {
   title: string;
   description?: string;
@@ -28,7 +33,13 @@ export function PsychCard({
   url: string;
   method: "PATCH" | "PUT";
   onSaved?: () => void;
-  notePlaceholder: string;
+  /** null = sin nota. */
+  notePlaceholder: string | null;
+  /** Clave con la que se guarda (psych, setup…). */
+  field?: string;
+  /** Campos de texto cortos además de los chips. */
+  textFields?: TextField[];
+  icon?: ReactNode;
 }) {
   const [values, setValues] = useState<PsychValues>(initial);
   const { save, status } = useAutosave(url, method, onSaved);
@@ -36,7 +47,7 @@ export function PsychCard({
 
   const update = (next: PsychValues) => {
     setValues(next);
-    save({ psych: next });
+    save({ [field]: next });
   };
 
   const toggle = (group: ChipGroup, option: string) => {
@@ -61,7 +72,7 @@ export function PsychCard({
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2">
-          <Brain className="h-3.5 w-3.5" aria-hidden="true" />
+          {icon ?? <Brain className="h-3.5 w-3.5" aria-hidden="true" />}
           {title}
         </CardTitle>
         <span role="status" className="text-xs text-muted-foreground">
@@ -99,20 +110,36 @@ export function PsychCard({
             </div>
           </fieldset>
         ))}
-        <div className="space-y-1.5">
-          <label htmlFor={noteId} className="text-xs text-muted-foreground">
-            Nota (opcional)
-          </label>
-          <textarea
-            id={noteId}
-            value={typeof values.note === "string" ? values.note : ""}
-            maxLength={2000}
-            rows={2}
-            placeholder={notePlaceholder}
-            onChange={(event) => update({ ...values, note: event.target.value })}
-            className="flex w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          />
-        </div>
+        {textFields.map((text) => (
+          <div key={text.key} className="space-y-1.5">
+            <label htmlFor={`${noteId}-${text.key}`} className="text-xs text-muted-foreground">
+              {text.label}
+            </label>
+            <Input
+              id={`${noteId}-${text.key}`}
+              value={typeof values[text.key] === "string" ? (values[text.key] as string) : ""}
+              maxLength={text.maxLength}
+              placeholder={text.placeholder}
+              onChange={(event) => update({ ...values, [text.key]: event.target.value })}
+            />
+          </div>
+        ))}
+        {notePlaceholder !== null && (
+          <div className="space-y-1.5">
+            <label htmlFor={noteId} className="text-xs text-muted-foreground">
+              Nota (opcional)
+            </label>
+            <textarea
+              id={noteId}
+              value={typeof values.note === "string" ? values.note : ""}
+              maxLength={2000}
+              rows={2}
+              placeholder={notePlaceholder ?? undefined}
+              onChange={(event) => update({ ...values, note: event.target.value })}
+              className="flex w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

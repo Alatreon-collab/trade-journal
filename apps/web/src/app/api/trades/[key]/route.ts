@@ -1,5 +1,6 @@
 import { tradeRisk, tradeR, plannedR } from "@luxalgo/journal-core";
 import { sanitizePsych, TRADE_PSYCH_GROUPS } from "@/lib/psychology";
+import { sanitizeSetup } from "@/lib/setup";
 import { eq } from "drizzle-orm";
 import { db, trades, playbooks, accounts } from "@/db";
 import { bad, handler, ok, requireValue } from "@/server/api";
@@ -46,6 +47,7 @@ interface AnnotateBody {
   profitTarget?: number | null;
   reviewed?: boolean;
   psych?: unknown;
+  setup?: unknown;
 }
 
 export const PATCH = handler(async (request: Request, { params }: Params) => {
@@ -88,6 +90,14 @@ export const PATCH = handler(async (request: Request, { params }: Params) => {
       return bad((error as Error).message);
     }
   }
+  let setup: ReturnType<typeof sanitizeSetup> | undefined;
+  if (body.setup !== undefined) {
+    try {
+      setup = sanitizeSetup(body.setup);
+    } catch (error) {
+      return bad((error as Error).message);
+    }
+  }
   const patch: Partial<typeof trades.$inferInsert> = {};
   if (body.notes !== undefined) patch.notes = body.notes;
   if (body.tags !== undefined) patch.tagsJson = JSON.stringify(body.tags);
@@ -98,6 +108,7 @@ export const PATCH = handler(async (request: Request, { params }: Params) => {
   if (body.profitTarget !== undefined) patch.profitTarget = body.profitTarget;
   if (body.reviewed !== undefined) patch.reviewedAt = body.reviewed ? nowIso() : null;
   if (psych !== undefined) patch.psychJson = psych ? JSON.stringify(psych) : null;
+  if (setup !== undefined) patch.setupJson = setup ? JSON.stringify(setup) : null;
 
   if (!Object.keys(patch).length) return ok({ updated: true });
   db.update(trades).set(patch).where(eq(trades.key, decoded)).run();

@@ -4,7 +4,7 @@ import { AiNotice } from "@/components/ai-notice";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { use, useEffect, useMemo, useRef, useState } from "react";
-import { Pencil, Sparkles } from "lucide-react";
+import { Crosshair, Pencil, Sparkles } from "lucide-react";
 import { FilterBar } from "@/components/filter-bar";
 import { Pnl } from "@/components/pnl";
 import { MonetaryValue, MonetaryField } from "@/components/privacy";
@@ -39,6 +39,7 @@ import { ReviewExport } from "@/components/review-export";
 import { RuleChecklist } from "@/components/rule-checklist";
 import { PsychCard } from "@/components/psych-card";
 import { parsePsych, TRADE_PSYCH_GROUPS } from "@/lib/psychology";
+import { SETUP_GROUPS, SETUP_TEXT_FIELDS } from "@/lib/setup";
 import { useAutosave } from "@/lib/use-autosave";
 import { postJson, useApi } from "@/lib/use-api";
 import { fmtDuration, fmtMoney, fmtNumber, fmtPercent, pnlClass } from "@/lib/utils";
@@ -78,6 +79,7 @@ interface TradeDetail {
   profitTarget: number | null;
   reviewedAt: string | null;
   psychJson: string | null;
+  setupJson: string | null;
 }
 
 interface ExecutionRow {
@@ -320,6 +322,19 @@ function TradeView({ tradeKey }: { tradeKey: string }) {
 
         <div className="min-w-0 space-y-3">
           <AnnotationsCard key={trade.key} trade={trade} onPatch={patch} />
+          <PsychCard
+            key={`setup-${trade.key}`}
+            title="Setup"
+            description="Cómo era el setup. La nota previa es la que te pones antes de entrar. Va en la exportación para el bot."
+            groups={SETUP_GROUPS}
+            initial={parsePsych(trade.setupJson)}
+            url={`/api/trades/${encodeURIComponent(trade.key)}`}
+            method="PATCH"
+            field="setup"
+            textFields={SETUP_TEXT_FIELDS}
+            notePlaceholder={null}
+            icon={<Crosshair className="h-3.5 w-3.5" aria-hidden="true" />}
+          />
           <PsychCard
             key={`psych-${trade.key}`}
             title="Psicología"

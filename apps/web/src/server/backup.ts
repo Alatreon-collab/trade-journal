@@ -22,7 +22,7 @@ export const backupDir = (): string => {
 const pendingPath = () => join(backupDir(), "pendiente.db");
 
 /** Ajustes que pertenecen a este PC y nunca se copian ni se sobrescriben. */
-const LOCAL_ONLY_SQL = "(lower(key) LIKE '%keyenc' OR key = 'pcName')";
+const LOCAL_ONLY_SQL = "(lower(key) LIKE '%keyenc' OR key IN ('pcName', 'botExportPath'))";
 
 export const getPcName = (): string => {
   const row = raw().prepare("SELECT value FROM settings WHERE key = 'pcName'").get() as

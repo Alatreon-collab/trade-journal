@@ -143,6 +143,10 @@ export const trades = sqliteTable(
     reviewedAt: text("reviewed_at"),
     /** Psicología del trade (chips), JSON. */
     psychJson: text("psych_json"),
+    /** Setup del modelo (temporalidades, POI, liquidez, notas A+…F), JSON. */
+    setupJson: text("setup_json"),
+    /** Identificador fijo del trade (no cambia aunque se edite la hora o se mueva de cuenta). */
+    uid: text("uid"),
   },
   (table) => [
     index("trades_account_closed").on(table.accountId, table.closedAt),
@@ -249,6 +253,8 @@ export const missedTrades = sqliteTable("missed_trades", {
   notes: text("notes").notNull().default(""),
   createdAt: text("created_at").notNull(),
   archivedAt: text("archived_at"),
+  /** Setup del modelo, igual que en los trades, JSON. */
+  setupJson: text("setup_json"),
 });
 
 /** Derived market-data estimates; journal fills remain authoritative. */

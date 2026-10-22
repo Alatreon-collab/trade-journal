@@ -3,6 +3,10 @@ import { buildRoundTrips, type Execution, type ProfitCalcMethod } from "@luxalgo
 import { db, executions, trades, accounts } from "@/db";
 import { getMultipliers, getJournalDefaults } from "./settings";
 import { defaultRisk } from "@/lib/journal-defaults";
+import { randomBytes } from "node:crypto";
+
+/** Identificador fijo del trade: se crea una vez y se conserva al recalcular. */
+export const newTradeUid = (): string => randomBytes(6).toString("hex");
 
 /**
  * Rebuild the materialized round trips for an account from its executions.
@@ -69,6 +73,7 @@ export const rebuildAccount = (accountId: string): void => {
       tx.insert(trades)
         .values({
           key: trip.key,
+          uid: newTradeUid(),
           ...computed,
           ...defaultRisk(trip.avgEntry, trip.direction, accountId, trip.symbol, defaults),
         })

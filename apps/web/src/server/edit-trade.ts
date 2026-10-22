@@ -62,6 +62,9 @@ export function editManualTrade(key: string, rows: EditedExecution[]): { key: st
       profitTarget: old.profitTarget,
       reviewedAt: old.reviewedAt,
       psychJson: old.psychJson,
+      setupJson: old.setupJson,
+      // El identificador del trade no cambia aunque cambie la hora de entrada.
+      uid: old.uid,
     };
     const before = new Set(
       db

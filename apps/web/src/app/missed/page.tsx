@@ -13,6 +13,14 @@ import { Attachments } from "@/components/attachments";
 import { ReviewExport } from "@/components/review-export";
 import { MonetaryValue, MonetaryField } from "@/components/privacy";
 import { useApi, postJson } from "@/lib/use-api";
+import { PsychCard } from "@/components/psych-card";
+import { toWallTime } from "@/components/edit-executions";
+import { parsePsych } from "@/lib/psychology";
+import { SETUP_GROUPS, SETUP_TEXT_FIELDS } from "@/lib/setup";
+import { useJournalTimeZone } from "@/lib/journal-timezone";
+import { parseTimestamp } from "@luxalgo/journal-importers";
+import { formatTimestamp } from "@/lib/timezone";
+import { Crosshair } from "lucide-react";
 interface Missed {
   id: string;
   symbol: string;
@@ -24,13 +32,13 @@ interface Missed {
   playbookId: string | null;
   notes: string;
   archivedAt: string | null;
+  setupJson: string | null;
 }
-const blank = () => ({
+// Las horas se escriben en la zona del journal (Nueva York), no en la del PC.
+const blank = (timeZone: string) => ({
   symbol: "",
   direction: "long",
-  observedAt: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16),
+  observedAt: toWallTime(new Date().toISOString(), timeZone).slice(0, 16),
   entry: "",
   stop: "",
   target: "",
@@ -49,7 +57,8 @@ function Missed() {
     { data: books } = useApi<{ playbooks: { id: string; name: string }[] }>("/api/playbooks");
   const [open, setOpen] = useState(false),
     [editing, setEditing] = useState<string | null>(null),
-    [draft, setDraft] = useState(blank),
+    timeZone = useJournalTimeZone() ?? "America/New_York",
+    [draft, setDraft] = useState(() => blank("America/New_York")),
     [search, setSearch] = useState(""),
     [archived, setArchived] = useState(false),
     [failure, setFailure] = useState(""),
@@ -61,18 +70,14 @@ function Missed() {
         ? {
             symbol: t.symbol,
             direction: t.direction,
-            observedAt: new Date(
-              Date.parse(t.observedAt) - new Date(t.observedAt).getTimezoneOffset() * 60000,
-            )
-              .toISOString()
-              .slice(0, 16),
+            observedAt: toWallTime(t.observedAt, timeZone).slice(0, 16),
             entry: t.entry?.toString() ?? "",
             stop: t.stop?.toString() ?? "",
             target: t.target?.toString() ?? "",
             playbookId: t.playbookId ?? "",
             notes: t.notes,
           }
-        : blank(),
+        : blank(timeZone),
     );
     setFailure("");
     setOpen(true);
@@ -169,7 +174,7 @@ function Missed() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(t.observedAt).toLocaleString("es-ES")} ·{" "}
+                  {formatTimestamp(t.observedAt, timeZone)} ·{" "}
                   {books?.playbooks.find((b) => b.id === t.playbookId)?.name ?? "Sin estrategia"}
                 </p>
               </CardHeader>
@@ -201,6 +206,19 @@ function Missed() {
                   }}
                 />
                 <Attachments type="missed" id={t.id} />
+                <PsychCard
+                  key={`setup-${t.id}`}
+                  title="Setup"
+                  description="El motivo de no entrar va en la revisión de arriba. Va en la exportación para el bot como setup no tomado."
+                  groups={SETUP_GROUPS}
+                  initial={parsePsych(t.setupJson)}
+                  url={`/api/missed/${encodeURIComponent(t.id)}`}
+                  method="PATCH"
+                  field="setup"
+                  textFields={SETUP_TEXT_FIELDS}
+                  notePlaceholder={null}
+                  icon={<Crosshair className="h-3.5 w-3.5" aria-hidden="true" />}
+                />
               </CardContent>
             </Card>
           ))}
@@ -229,7 +247,11 @@ function Missed() {
                   <option value="short">Short</option>
                 </OptionSelect>
               </Field>
-              {formField("observedAt", "Vista a las (hora del dispositivo)", "datetime-local")}
+              {formField(
+                "observedAt",
+                `Vista a las (${timeZone === "America/New_York" ? "hora de Nueva York" : timeZone})`,
+                "datetime-local",
+              )}
               <Field label="Estrategia">
                 <OptionSelect
                   className={fieldClass}
@@ -269,7 +291,9 @@ function Missed() {
                   await postJson("/api/workspace/missed", {
                     ...draft,
                     id: editing,
-                    observedAt: new Date(draft.observedAt).toISOString(),
+                    observedAt:
+                      parseTimestamp(draft.observedAt, timeZone) ??
+                      new Date(draft.observedAt).toISOString(),
                     entry: draft.entry === "" ? null : Number(draft.entry),
                     stop: draft.stop === "" ? null : Number(draft.stop),
                     target: draft.target === "" ? null : Number(draft.target),

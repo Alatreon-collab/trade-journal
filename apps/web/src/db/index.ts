@@ -36,6 +36,17 @@ const createDb = () => {
     if (!columns.some((column) => column.name === "psych_json"))
       sqlite.exec(`ALTER TABLE ${table} ADD COLUMN psych_json TEXT`);
   }
+  // Setup del modelo e identificador fijo de cada trade (exportación para el bot).
+  for (const [table, column] of [
+    ["trades", "setup_json"],
+    ["trades", "uid"],
+    ["missed_trades", "setup_json"],
+  ] as const) {
+    const columns = sqlite.pragma(`table_info(${table})`) as { name: string }[];
+    if (!columns.some((item) => item.name === column))
+      sqlite.exec(`ALTER TABLE ${table} ADD COLUMN ${column} TEXT`);
+  }
+  sqlite.exec("UPDATE trades SET uid = lower(hex(randomblob(6))) WHERE uid IS NULL");
   // Materialize CSV bounds once so connection and range lookups never scan candle JSON.
   const csvColumns = sqlite.pragma("table_info(market_csv_datasets)") as { name: string }[];
   sqlite.transaction(() => {
