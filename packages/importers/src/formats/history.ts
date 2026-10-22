@@ -12,10 +12,16 @@ export interface HistoryParseOptions extends ImportOptions {
 const symbolFrom = (content: string, options: ImportOptions): string | undefined => {
   if (options.symbol?.trim()) return options.symbol.trim().toUpperCase();
   // Only a known exchange + ticker in TradingView's filename counts as evidence.
+  // Futuros: "CME_MINI_NQ1!_2026-…" (replay / strategy tester) → NQ; "…_NQZ2026_…" → NQ.
   const name = options.fileName?.match(
-    /(?:^|_)(?:NASDAQ|NYSE|AMEX|CME|COMEX|CBOT|NYMEX|OANDA|FOREXCOM|BINANCE|COINBASE)_([A-Za-z0-9.!-]+)_(?=\d)/i,
+    /(?:^|_)(NASDAQ|NYSE|AMEX|CME|COMEX|CBOT|NYMEX|OANDA|FOREXCOM|BINANCE|COINBASE)(?:_MINI)?_([A-Za-z0-9.!-]+)_(?=\d)/i,
   );
-  if (name) return name[1]!.toUpperCase();
+  if (name) {
+    const ticker = name[2]!.toUpperCase();
+    return /^(CME|COMEX|CBOT|NYMEX)$/i.test(name[1]!)
+      ? ticker.replace(/^([A-Z0-9]{1,4}?)[FGHJKMNQUVXZ]\d{4}$/, "$1").replace(/\d+!?$/, "")
+      : ticker;
+  }
   const preamble = content
     .slice(0, 4000)
     .match(/^(?:symbol|ticker)\s*[,;\t:]\s*"?([A-Za-z0-9:/.!_-]+)"?\s*$/im);

@@ -67,6 +67,13 @@ describe("simulator history formats extend the journal import path", () => {
     const named = parse(TV, { fileName: "My_Strategy_NASDAQ_AAPL_2026-09-02.csv" });
     expect(named.executions.every((e) => e.symbol === "AAPL")).toBe(true);
     expect(parseAuto(TV, { fileName: "My_strategy.csv" })?.needsSymbol).toBe(true);
+    // Replay / strategy tester de futuros: "CME_MINI_NQ1_…" o "CBOT_MINI_MYM1!_…" → raíz del contrato.
+    for (const [fileName, symbol] of [
+      ["Replay_Trading_CME_MINI_NQ1_2026-10-22_0d0c9.csv", "NQ"],
+      ["Strategy_CBOT_MINI_MYM1!_2026-10-22.csv", "MYM"],
+      ["Strategy_CME_MNQZ2026_2026-10-22.csv", "MNQ"],
+    ])
+      expect(parse(TV, { fileName }).executions.every((e) => e.symbol === symbol)).toBe(true);
     const withColumn = TV.split("\n")
       .map((line, i) => line + (i ? ",MSFT" : ",Symbol"))
       .join("\n");
