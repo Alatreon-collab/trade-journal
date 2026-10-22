@@ -24,6 +24,8 @@ export interface FillsFormatSpec {
   /** Skip rows that aren't fills (unfilled orders, section noise). */
   rowFilter?: (row: Row) => boolean;
   normalizeSymbol?: (symbol: string) => string;
+  /** Limpia las filas antes de convertirlas (p. ej. salidas cuya entrada no está en el archivo). */
+  prepareRows?: (rows: Row[]) => { rows: Row[]; warnings: string[] };
 }
 
 export const parseSide = (value: string | undefined): "buy" | "sell" | null => {
@@ -105,8 +107,14 @@ export const makeFillsFormat = (spec: FillsFormatSpec): ImportFormat => ({
   label: spec.label,
   detect: (headers) => hasHeaders(headers, spec.required),
   parse: (content, options): ParsedImport => {
-    const records = toRecords(parseCsv(content));
-    const { executions, skippedRows } = rowsToFills(records, spec.columns, options, spec);
-    return { format: spec.id, executions, skippedRows, warnings: [] };
+    const all = toRecords(parseCsv(content));
+    const prepared = spec.prepareRows ? spec.prepareRows(all) : { rows: all, warnings: [] };
+    const { executions, skippedRows } = rowsToFills(prepared.rows, spec.columns, options, spec);
+    return {
+      format: spec.id,
+      executions,
+      skippedRows: skippedRows + (all.length - prepared.rows.length),
+      warnings: prepared.warnings,
+    };
   },
 });

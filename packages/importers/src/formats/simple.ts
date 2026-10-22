@@ -1,3 +1,4 @@
+import type { Row } from "../csv";
 import { makeFillsFormat } from "./fills";
 
 /** Tradervue executions export: Date,Time,Symbol,Quantity,Price,Side,Commission,TransFee,ECNFee */
@@ -16,8 +17,53 @@ export const tradervue = makeFillsFormat({
   },
 });
 
+const BRACKET_TYPES = /^(stop|limit|stop loss|take profit)$/i;
+
+/**
+ * Paper trading de TradingView: el historial puede empezar con la salida (stop o
+ * take profit de un bracket) de una posición abierta antes del periodo exportado.
+ * Si se deja, desplaza el resto de trades de ese símbolo (salidas tomadas como
+ * entradas). Se omite la salida huérfana y se avisa.
+ */
+const dropOrphanBracketExits = (rows: Row[]) => {
+  const filled = (row: Row) => (row["fillprice"] ?? "").trim() !== "";
+  const key = (row: Row) =>
+    [row["symbol"], (row["side"] ?? "").toLowerCase(), row["placingtime"]].join("|");
+  const bracketGroups = new Map<string, Row[]>();
+  for (const row of rows)
+    if (BRACKET_TYPES.test((row["type"] ?? "").trim()))
+      bracketGroups.set(key(row), [...(bracketGroups.get(key(row)) ?? []), row]);
+  // Un bracket: dos órdenes del mismo lado colocadas a la vez (stop + límite).
+  const isBracketExit = (row: Row) => (bracketGroups.get(key(row))?.length ?? 0) >= 2;
+
+  const position = new Map<string, number>();
+  const dropped = new Set<Row>();
+  const warnings: string[] = [];
+  const ordered = rows
+    .filter(filled)
+    .sort((a, b) =>
+      (a["closingtime"] ?? a["time"] ?? "").localeCompare(b["closingtime"] ?? b["time"] ?? ""),
+    );
+  for (const row of ordered) {
+    const symbol = row["symbol"] ?? "";
+    const quantity = Math.abs(Number(row["quantity"] ?? row["qty"] ?? 0)) || 0;
+    const signed = /^buy/i.test((row["side"] ?? "").trim()) ? quantity : -quantity;
+    const current = position.get(symbol) ?? 0;
+    if (current === 0 && isBracketExit(row)) {
+      dropped.add(row);
+      warnings.push(
+        `Se ha omitido una salida de ${symbol.split(":").pop()!.replace(/\d+!$/, "")} (${row["closingtime"]}) porque su entrada es anterior a las fechas del archivo.`,
+      );
+      continue;
+    }
+    position.set(symbol, current + signed);
+  }
+  return { rows: rows.filter((row) => !dropped.has(row)), warnings };
+};
+
 /** TradingView paper-trading history export. */
 export const tradingview = makeFillsFormat({
+  prepareRows: dropOrphanBracketExits,
   id: "tradingview",
   label: "TradingView (paper trading history)",
   required: [["symbol"], ["side"], ["fillprice"]],
@@ -31,8 +77,16 @@ export const tradingview = makeFillsFormat({
   },
   rowFilter: (row) =>
     !("status" in row) || /filled/i.test(row["status"] ?? "") || row["status"] === "",
-  // "NASDAQ:AAPL" → "AAPL"
-  normalizeSymbol: (symbol) => symbol.split(":").pop()!.trim().toUpperCase(),
+  // "NASDAQ:AAPL" → "AAPL". Futuros: continuo "CME_MINI:MNQ1!" → "MNQ" y contrato
+  // "CME_MINI:MNQZ2026" → "MNQ", para que use el multiplicador de Ajustes.
+  normalizeSymbol: (symbol) =>
+    symbol
+      .split(":")
+      .pop()!
+      .trim()
+      .toUpperCase()
+      .replace(/\d+!$/, "")
+      .replace(/^([A-Z0-9]{1,4}?)[FGHJKMNQUVXZ]\d{4}$/, "$1"),
 });
 
 export { ninjatrader } from "./ninjatrader";

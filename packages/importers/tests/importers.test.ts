@@ -76,6 +76,35 @@ describe("importers turn any platform's export into normalized executions", () =
     expect(result.skippedRows).toBe(1);
   });
 
+  it("a TradingView paper-trading export maps futures to their root symbol and skips unfilled orders", () => {
+    const csv = `Symbol,Side,Type,Quantity,Limit price,Stop price,Fill price,Commission,Placing time,Closing time,Order ID,Level ID
+CME_MINI:MNQ1!,Sell,Market,1,,,29862.25,,2026-10-15 08:30:44,2026-10-15 08:30:44,3676431241,
+CME_MINI:MNQ1!,Buy,Stop,1,,29942.75,,,2026-10-15 08:30:44,2026-10-15 08:43:44,3676431242,
+CME_MINI:MNQ1!,Buy,Limit,1,29823,,29822.5,,2026-10-15 08:30:44,2026-10-15 08:43:44,3676431243,
+CBOT_MINI:MYMZ2026,Buy,Market,1,,,52011,,2026-10-15 12:00:32,2026-10-15 12:00:32,3677040675,`;
+    const result = parseAuto(csv, { timeZone: "Europe/Madrid" })!;
+    expect(result.format).toBe("tradingview");
+    expect(result.executions.map((e) => e.symbol)).toEqual(["MNQ", "MNQ", "MYM"]);
+    // La hora de la ejecución es la de cierre de la orden (cuando se llenó), no la de colocación.
+    expect(result.executions[1]!.executedAt).toBe("2026-10-15T06:43:44.000Z");
+    expect(result.skippedRows).toBe(1);
+  });
+
+  it("a TradingView export drops a leading bracket exit whose entry is older than the file", () => {
+    const csv = `Symbol,Side,Type,Quantity,Limit price,Stop price,Fill price,Commission,Placing time,Closing time,Order ID,Level ID
+CBOT_MINI:MYM1!,Sell,Limit,1,52138,,,,2026-10-14 13:35:40,2026-10-14 13:56:16,3671903120,
+CBOT_MINI:MYM1!,Sell,Stop,1,,52065,52060,,2026-10-14 13:35:40,2026-10-14 13:56:16,3671903119,
+CBOT_MINI:MYM1!,Buy,Market,1,,,51900,,2026-10-14 17:32:36,2026-10-14 17:32:36,3673657915,
+CBOT_MINI:MYM1!,Sell,Limit,1,51969,,,,2026-10-14 17:32:36,2026-10-14 17:45:24,3673657917,
+CBOT_MINI:MYM1!,Sell,Stop,1,,51819,51817,,2026-10-14 17:32:36,2026-10-14 17:45:24,3673657916,`;
+    const result = parseAuto(csv, { timeZone: "Europe/Madrid" })!;
+    expect(result.executions.map((e) => [e.side, e.price])).toEqual([
+      ["buy", 51900],
+      ["sell", 51817],
+    ]);
+    expect(result.warnings.join(" ")).toContain("Se ha omitido una salida de MYM (");
+  });
+
   it("an IBKR activity statement imports only fill rows, with signed quantity as the side", () => {
     const result = parseAuto(IBKR_CSV)!;
     expect(result.format).toBe("ibkr");
