@@ -72,6 +72,24 @@ interface PreviewResponse {
   }[];
 }
 
+// Zona horaria recordada por tipo de archivo (p. ej. Tradovate en hora de España).
+const ZONES_KEY = "journal-import-zones-v1";
+const rememberedZones = (): Record<string, string> => {
+  try {
+    return JSON.parse(localStorage.getItem(ZONES_KEY) ?? "{}") as Record<string, string>;
+  } catch {
+    return {};
+  }
+};
+const rememberZone = (format: string | null | undefined, zone: string) => {
+  if (!format) return;
+  try {
+    localStorage.setItem(ZONES_KEY, JSON.stringify({ ...rememberedZones(), [format]: zone }));
+  } catch {
+    // sin almacenamiento: se elige a mano
+  }
+};
+
 export default function ImportPage() {
   return (
     <Suspense>
@@ -163,6 +181,7 @@ function FileImport() {
     }
   >("/api/settings");
   const [statementTimeZone, setStatementTimeZone] = useState<string | null>(null);
+  const [zoneNote, setZoneNote] = useState("");
   const timeZone = statementTimeZone ?? settingsData?.importTimeZone ?? "";
   const validTimeZone = isTimeZone(timeZone);
   const displayTimeZone = settingsData?.timeZone ?? "UTC";
@@ -218,16 +237,27 @@ function FileImport() {
       setContent(text);
       // Choosing a file alone never sends it to an AI provider.
       if (aiEnabled) return;
-      setPreview(
-        await postJson<PreviewResponse>("/api/import", {
+      const ask = (zone: string) =>
+        postJson<PreviewResponse>("/api/import", {
           mode: "preview",
           content: text,
           accountId: accountId || undefined,
           review: {},
           fileName: file.name,
-          timeZone,
-        }),
-      );
+          timeZone: zone,
+        });
+      let result = await ask(timeZone);
+      setZoneNote("");
+      // Si este tipo de archivo ya se importó con otra zona horaria, se usa esa.
+      const remembered = result.detected ? rememberedZones()[result.detected] : undefined;
+      if (remembered && remembered !== timeZone && isTimeZone(remembered)) {
+        result = await ask(remembered);
+        setStatementTimeZone(remembered);
+        setZoneNote(
+          `Zona horaria recordada para este tipo de archivo: ${remembered}. Si no es la correcta, cámbiala arriba.`,
+        );
+      }
+      setPreview(result);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Falló la vista previa de la importación");
     } finally {
@@ -312,6 +342,7 @@ function FileImport() {
             }
           : {}),
       });
+      rememberZone(preview.detected, preview.timeZone);
       const skippedNote =
         result.skipped && result.skipped > 0
           ? ` Se omitieron ${result.skipped} filas no válidas: ${(result.warnings ?? []).at(-1) ?? ""}`
@@ -376,15 +407,45 @@ function FileImport() {
               describedBy="statement-timezone-help"
               onValueChange={(zone) => {
                 setStatementTimeZone(zone);
+                setZoneNote("");
+                const hadPreview = Boolean(preview) && !aiEnabled && !mappingApplied;
                 setPreview(null);
                 setAiReviewed(false);
                 setMappingApplied(false);
+                // Con un archivo ya cargado, se vuelve a leer con la nueva zona horaria.
+                if (hadPreview && content && isTimeZone(zone)) {
+                  setBusy(true);
+                  postJson<PreviewResponse>("/api/import", {
+                    mode: "preview",
+                    content,
+                    accountId: accountId || undefined,
+                    review: reviewOptions,
+                    fileName,
+                    symbol,
+                    timeZone: zone,
+                    encoding,
+                  })
+                    .then(setPreview)
+                    .catch((cause: unknown) =>
+                      setError(
+                        cause instanceof Error
+                          ? cause.message
+                          : "Falló la vista previa de la importación",
+                      ),
+                    )
+                    .finally(() => setBusy(false));
+                }
               }}
             />
             <p id="statement-timezone-help" className="mt-1 text-xs text-muted-foreground">
               Elige la zona horaria que usa el extracto de tu bróker. Las horas que ya llevan un
               desfase explícito lo mantienen. Tu journal muestra las horas en {displayTimeZone}.
             </p>
+            {zoneNote && (
+              <p role="status" className="mt-1 text-xs text-muted-foreground">
+                {zoneNote}
+              </p>
+            )}
             {timeZone && !validTimeZone && (
               <p role="alert" className="mt-1 text-xs text-loss">
                 Introduce una zona horaria IANA válida, como Europe/Madrid.
