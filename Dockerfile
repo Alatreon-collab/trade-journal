@@ -8,7 +8,7 @@ COPY apps/web/package.json ./apps/web/package.json
 RUN pnpm install --frozen-lockfile
 COPY apps/web ./apps/web
 COPY tsconfig.base.json ./
-RUN pnpm --filter web build
+RUN NEXT_OUTPUT=standalone pnpm --filter web build
 
 FROM node:22-slim AS runner
 ENV NODE_ENV=production
